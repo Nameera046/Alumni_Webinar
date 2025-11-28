@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Clock, Compass, Globe, Upload, Calendar, X ,User} from 'lucide-react';
-import './common.css'; // Make sure this imports your common CSS
+import './Common.css'; // Make sure this imports your common CSS
 
 export default function SpeakerAssignmentForm() {
   const [formData, setFormData] = useState({
