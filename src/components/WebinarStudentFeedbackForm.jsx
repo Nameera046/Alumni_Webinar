@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { GraduationCap, User, Mail } from "lucide-react";
+import { GraduationCap, User, Mail, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import "./Common.css";
 
 export default function WebinarStudentFeedbackForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -55,6 +57,9 @@ export default function WebinarStudentFeedbackForm() {
 
       <div className="form-wrapper">
         <div className="form-container">
+          <button className="back-btn" onClick={() => navigate("/")}>
+            <ArrowLeft className="back-btn-icon" /> Back to Dashboard
+          </button>
           <div className="form-header">
             <div className="icon-wrapper">
               <GraduationCap className="header-icon" />

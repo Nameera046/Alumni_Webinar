@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { Building2, Clock, Compass, Globe, Upload, Calendar, X ,User} from 'lucide-react';
+
+import { Building2, Clock, Compass, Globe, Upload, Calendar, X ,User,ArrowLeft,Mail} from 'lucide-react';
+import { useNavigate } from "react-router-dom"; 
+import React, { useState } from "react";
 import './Common.css'; 
-export default function SpeakerAssignmentForm() {
+
+export default function WebinarSpeakerAssignmentForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '', department: '', batch: '', designation: '', companyName: '', speakerPhoto: null, domain: ''
+    name: '', department: '', batch: '', email: '', designation: '', companyName: '', speakerPhoto: null, domain: ''
   });
   const [slots, setSlots] = useState([{ deadline: '', time: '' }]);
 
@@ -29,7 +33,7 @@ export default function SpeakerAssignmentForm() {
   const removeSlot = index => setSlots(slots.filter((_, i) => i !== index));
 
   const handleSubmit = () => {
-    if (!formData.name || !formData.department || !formData.batch || !formData.designation ||
+    if (!formData.name || !formData.department || !formData.batch || !formData.email || !formData.designation ||
         !formData.companyName || !formData.speakerPhoto || !formData.domain ||
         slots.some(s => !s.deadline || !s.time)) {
       alert("Please fill all required fields");
@@ -51,8 +55,9 @@ export default function SpeakerAssignmentForm() {
 
       <div className="form-wrapper">
         <div className="form-container">
-
-          {/* Form Header */}
+          <button className="back-btn" onClick={() => navigate("/")}>
+            <ArrowLeft className="back-btn-icon" /> Back to Dashboard
+          </button>
           <div className="form-header">
             <div className="icon-wrapper">
               <Building2 className="header-icon" />
@@ -62,19 +67,25 @@ export default function SpeakerAssignmentForm() {
           <div className="form-card">
             <div className="form-fields">
               <h2 className="section-heading">Speaker Details</h2>
+              <div className="form-group">
+                <label>
+                  <Mail className="field-icon" /> Email <span className="required">*</span>
+                </label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Enter email" className="input-field" />
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="form-group">
                   <label>
                     <User className="field-icon" /> Name <span className="required">*</span>
                   </label>
-                  <input type="text" name="name" value={formData.name} onChange={handleChange} className="input-field" />
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Auto fetched from profile" className="input-field" readOnly />
                 </div>
 
                 <div className="form-group">
                   <label>
                     <Building2 className="field-icon" /> Department <span className="required">*</span>
                   </label>
-                  <input type="text" name="department" value={formData.department} onChange={handleChange} className="input-field" />
+                  <input type="text" name="department" value={formData.department} onChange={handleChange} placeholder="Auto fetched from profile" className="input-field" readOnly />
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -82,14 +93,14 @@ export default function SpeakerAssignmentForm() {
                   <label>
                     <Globe className="field-icon" /> Batch <span className="required">*</span>
                   </label>
-                  <input type="text" name="batch" value={formData.batch} onChange={handleChange} className="input-field" />
+                  <input type="text" name="batch" value={formData.batch} onChange={handleChange} placeholder="Auto fetched from profile" className="input-field" readOnly />
                 </div>
 
                 <div className="form-group">
                   <label>
                     <Compass className="field-icon" /> Designation <span className="required">*</span>
                   </label>
-                  <input type="text" name="designation" value={formData.designation} onChange={handleChange} className="input-field" />
+                  <input type="text" name="designation" value={formData.designation} onChange={handleChange} placeholder="Enter designation" className="input-field" />
                 </div>
               </div>
 
@@ -137,13 +148,13 @@ export default function SpeakerAssignmentForm() {
                     <label>
                       <Calendar className="field-icon" /> Deadline <span className="required">*</span>
                     </label>
-                    <input type="date" value={slot.deadline} onChange={e => handleSlotChange(i, "deadline", e.target.value)} className="input-field" />
+                    <input type="date" value={slot.deadline} onChange={e => handleSlotChange(i, "deadline", e.target.value)} placeholder="Select date" className="input-field" />
                   </div>
                   <div className="form-group">
                     <label>
                       <Clock className="field-icon" /> Time <span className="required">*</span>
                     </label>
-                    <input type="time" value={slot.time} onChange={e => handleSlotChange(i, "time", e.target.value)} className="input-field" />
+                    <input type="time" value={slot.time} onChange={e => handleSlotChange(i, "time", e.target.value)} placeholder="Select time" className="input-field" />
                   </div>
                 </div>
               ))}

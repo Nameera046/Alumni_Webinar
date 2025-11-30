@@ -35,16 +35,15 @@
   position: relative;
   z-index: 10;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 .form-container {
   width: 100%;
-    max-width: 45rem;   
 }
-.form-header { text-align: center; margin-bottom: 2rem; }
+.form-header { text-align: center; margin-bottom: 2rem;margin-top: 30px; }
 .icon-wrapper {
   display: inline-flex;
   align-items: center;
@@ -146,9 +145,14 @@
   margin-top: 2rem;
   font-weight: 500;
 }
-/* ============================
-   📱 MOBILE RESPONSIVE DESIGN
-   ============================ */
+
+.error-text {
+  color: #f44336;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
 
   .form-wrapper {
@@ -233,4 +237,60 @@
   .orb-purple { top: -10rem; left: -10rem; }
   .orb-blue { top: -10rem; right: -10rem; }
   .orb-pink { bottom: -10rem; }
+
+  /* Back button responsive styles */
+  .back-btn {
+    top: 10px;
+    left: 10px;
+    padding: 10px;
+    font-size: 8px;
+    min-width: 10px;
+    min-height: 10px;
+  }
+
+  .back-btn-icon {
+    width: 10px;
+    height: 10px;
+  }
+}
+.back-btn {
+  position: absolute;  /* fixes it to top-left */
+  top: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 5px 5px 5px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #4e4747;
+  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.back-btn:hover {
+  background: #f0f0ff;
+  border-color: #b3a8f5;
+  color: #4b3f91;
+}
+
+.back-btn-icon {
+  width: 42px;
+  height: 42px;
+}
+
+/* Additional spacing utilities for webinar details */
+.modal-spacing {
+  padding: 12px;
+}
+
+.detail-card-spacing {
+  margin-bottom: 16px;
+}
+
+.grid-spacing {
+  gap: 20px;
 }

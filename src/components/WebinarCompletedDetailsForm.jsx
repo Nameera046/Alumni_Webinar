@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { FiUser, FiMail, FiPhone, FiHash, FiBookOpen, FiAward, FiUpload } from "react-icons/fi";
+import { ArrowLeft  } from "lucide-react";
+import { useNavigate } from "react-router-dom"; 
 import "./Common.css";
 
 const WebinarCompletedDetailsForm = () => {
+    const navigate = useNavigate();
   const [formData, setFormData] = useState({
     chosenTopic: "",
     attendanceFile: null,
@@ -13,6 +16,7 @@ const WebinarCompletedDetailsForm = () => {
     batch: "",
     mobileNumber: "",
   });
+  const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -25,13 +29,15 @@ const WebinarCompletedDetailsForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.chosenTopic || !formData.attendanceFile || !formData.prizeWinnerEmail) {
-      alert("Please fill all required fields");
-      return;
+    const newErrors = {};
+    if (!formData.chosenTopic) newErrors.chosenTopic = 'Chosen Topic is required';
+    if (!formData.attendanceFile) newErrors.attendanceFile = 'Attendance Excel Sheet is required';
+    if (!formData.prizeWinnerEmail) newErrors.prizeWinnerEmail = 'Prize Winner Email is required';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      console.log("Submitted:", formData);
+      alert("Form submitted successfully! 🎉");
     }
-
-    console.log("Submitted:", formData);
-    alert("Form submitted successfully! 🎉");
   };
 
   return (
@@ -44,6 +50,9 @@ const WebinarCompletedDetailsForm = () => {
 
       <div className="form-wrapper">
         <div className="form-container">
+          <button className="back-btn" onClick={() => navigate("/")}>
+            <ArrowLeft className="back-btn-icon" /> Back to Dashboard
+          </button>
           <div className="form-header">
             <div className="icon-wrapper">
               <FiBookOpen className="header-icon" />
@@ -70,6 +79,7 @@ const WebinarCompletedDetailsForm = () => {
                     <option value="Cloud Fundamentals">Cloud Fundamentals</option>
                     <option value="AI Workshop">AI Workshop</option>
                   </select>
+                  {errors.chosenTopic && <div className="error-text">{errors.chosenTopic}</div>}
                 </div>
                 <div className="form-group">
                   <label><FiUpload className="field-icon" /> Upload Attendance Excel Sheet <span>*</span></label>
@@ -80,6 +90,7 @@ const WebinarCompletedDetailsForm = () => {
                     className="input-field"
                     required
                   />
+                  {errors.attendanceFile && <div className="error-text">{errors.attendanceFile}</div>}
                 </div>
 
                 <div className="form-group">
@@ -93,6 +104,7 @@ const WebinarCompletedDetailsForm = () => {
                     className="input-field"
                     required
                   />
+                  {errors.prizeWinnerEmail && <div className="error-text">{errors.prizeWinnerEmail}</div>}
                 </div>
 
                 <div className="form-group">

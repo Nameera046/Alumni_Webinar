@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { User, Compass, Globe, Mail, Phone, GraduationCap, MessageSquare } from 'lucide-react';
+import { User, Compass, Globe, Mail, Phone, GraduationCap, MessageSquare, ArrowLeft } from 'lucide-react';
+import { useNavigate } from "react-router-dom"; 
 import './Common.css';
 
 export default function StudentRequestForm() {
+    const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,6 +14,7 @@ export default function StudentRequestForm() {
     topic: '',
     isRobot: false
   });
+  const [errors, setErrors] = useState({});
   const typeOptions = [
     { value: "fullstack_development", label: "Fullstack Development" },
     { value: "blockchain", label: "Blockchain" },
@@ -26,17 +29,22 @@ export default function StudentRequestForm() {
     }));
   };
   const handleSubmit = () => {
+    const newErrors = {};
     if (!formData.isRobot) {
       alert('Please verify that you are not a robot');
       return;
     }
-    if (!formData.name || !formData.email || !formData.contact || 
-        !formData.department || !formData.domain || !formData.topic) {
-      alert('Please fill all required fields');
-      return;
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.email) newErrors.email = 'Personal Email ID is required';
+    if (!formData.contact) newErrors.contact = 'Contact No is required';
+    if (!formData.department) newErrors.department = 'Department is required';
+    if (!formData.domain) newErrors.domain = 'Domain is required';
+    if (!formData.topic) newErrors.topic = 'Topic is required';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      console.log('Form submitted:', formData);
+      alert('Form submitted successfully! 🎉');
     }
-    console.log('Form submitted:', formData);
-    alert('Form submitted successfully! 🎉');
   };
 
   return (
@@ -49,6 +57,9 @@ export default function StudentRequestForm() {
 
       <div className="form-wrapper">
         <div className="form-container">
+          <button className="back-btn" onClick={() => navigate("/")}>
+            <ArrowLeft className="back-btn-icon" /> Back to Dashboard
+          </button>
           <div className="form-header">
             <div className="icon-wrapper">
               <GraduationCap className="header-icon" />
@@ -70,6 +81,7 @@ export default function StudentRequestForm() {
                   placeholder="Auto fetched from profile"
                   className="input-field"
                 />
+                {errors.name && <div className="error-text">{errors.name}</div>}
               </div>
               <div className="form-group">
                 <label>
@@ -83,6 +95,7 @@ export default function StudentRequestForm() {
                   placeholder="Auto fetched from profile"
                   className="input-field"
                 />
+                {errors.email && <div className="error-text">{errors.email}</div>}
               </div>
               <div className="form-group">
                 <label>
@@ -96,6 +109,7 @@ export default function StudentRequestForm() {
                   placeholder="Auto fetched from profile"
                   className="input-field"
                 />
+                {errors.contact && <div className="error-text">{errors.contact}</div>}
               </div>
               <div className="form-group">
                 <label>
@@ -109,6 +123,7 @@ export default function StudentRequestForm() {
                   placeholder="Auto fetched from profile"
                   className="input-field"
                 />
+                {errors.department && <div className="error-text">{errors.department}</div>}
               </div>
               <div className="form-group">
                 <label>
@@ -125,6 +140,7 @@ export default function StudentRequestForm() {
                     <option key={option.value} value={option.value}>{option.label}</option>
                   ))}
                 </select>
+                {errors.domain && <div className="error-text">{errors.domain}</div>}
               </div>
               <div className="form-group">
                 <label>
@@ -138,6 +154,7 @@ export default function StudentRequestForm() {
                   rows="4"
                   className="textarea-field"
                 ></textarea>
+                {errors.topic && <div className="error-text">{errors.topic}</div>}
               </div>
               <div className="checkbox-group">
                 <input

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { User, Mail, GraduationCap, MessageSquare } from "lucide-react";
+import { User, Mail, GraduationCap, MessageSquare,ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom"; 
 import "./Common.css";
 
 const WebinarAlumniFeedbackForm = () => {
+    const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -12,6 +14,7 @@ const WebinarAlumniFeedbackForm = () => {
     feedback: "",
     isRobot: false,
   });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,19 +25,20 @@ const WebinarAlumniFeedbackForm = () => {
   };
 
   const handleSubmit = () => {
-    // Required field validation
-    if (!formData.webinar || !formData.rating1 || !formData.rating2 || !formData.feedback) {
-      alert("Please fill all required fields");
-      return;
-    }
-
+    const newErrors = {};
     if (!formData.isRobot) {
       alert("Please verify that you are not a robot");
       return;
     }
-
-    console.log("Feedback submitted:", formData);
-    alert("Feedback submitted successfully! 🎉");
+    if (!formData.webinar) newErrors.webinar = 'Webinar selection is required';
+    if (!formData.rating1) newErrors.rating1 = 'Rating for arrangements is required';
+    if (!formData.rating2) newErrors.rating2 = 'Rating for student involvement is required';
+    if (!formData.feedback) newErrors.feedback = 'Feedback is required';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length === 0) {
+      console.log("Feedback submitted:", formData);
+      alert("Feedback submitted successfully! 🎉");
+    }
   };
 
   return (
@@ -47,6 +51,9 @@ const WebinarAlumniFeedbackForm = () => {
 
       <div className="form-wrapper">
         <div className="form-container">
+        <button className="back-btn" onClick={() => navigate("/")}>
+          <ArrowLeft className="back-btn-icon" /> Back to Dashboard
+        </button>
           <div className="form-header">
             <div className="icon-wrapper">
               <GraduationCap className="header-icon" />
@@ -103,6 +110,7 @@ const WebinarAlumniFeedbackForm = () => {
                   <option value="webinar1">Webinar 1</option>
                   <option value="webinar2">Webinar 2</option>
                 </select>
+                {errors.webinar && <div className="error-text">{errors.webinar}</div>}
               </div>
 
               {/* Rating 1 */}
@@ -120,6 +128,7 @@ const WebinarAlumniFeedbackForm = () => {
                   <option value="Average">Average</option>
                   <option value="Poor">Poor</option>
                 </select>
+                {errors.rating1 && <div className="error-text">{errors.rating1}</div>}
               </div>
 
               {/* Rating 2 */}
@@ -137,6 +146,7 @@ const WebinarAlumniFeedbackForm = () => {
                   <option value="Average">Average</option>
                   <option value="Poor">Poor</option>
                 </select>
+                {errors.rating2 && <div className="error-text">{errors.rating2}</div>}
               </div>
 
               {/* Feedback */}
@@ -152,6 +162,7 @@ const WebinarAlumniFeedbackForm = () => {
                   rows="4"
                   className="textarea-field"
                 ></textarea>
+                {errors.feedback && <div className="error-text">{errors.feedback}</div>}
               </div>
 
               {/* Robot Check */}
