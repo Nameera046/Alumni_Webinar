@@ -10,7 +10,7 @@ import WebinarEvents from './components/WebinarEvents';
 
 function App() {
   return (
-    <Router basename="/Alumni-Webinar-Project">
+    <Router basename="/">
       <Routes>
         <Route path="/" element={<WebinarDashboard />} />
         <Route path="/student-request" element={<StudentRequestForm />} />
