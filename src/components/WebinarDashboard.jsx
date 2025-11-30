@@ -146,9 +146,6 @@ function DashboardShell() {
     <div className={`wb-root ${collegeTheme === 'college' ? 'theme-college' : ''}`}>
       <main className="wb-main">
         <div className="form-header">
-          <button className="back-btn" onClick={() => navigate("/")}>
-            <ArrowLeft className="back-btn-icon" /> Back to Home
-          </button>
             <div className="icon-wrapper">
               <GraduationCap className="header-icon" />
             </div>
