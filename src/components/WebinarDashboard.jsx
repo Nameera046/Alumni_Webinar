@@ -149,7 +149,9 @@ function DashboardShell() {
             <div className="icon-wrapper">
               <GraduationCap className="header-icon" />
             </div>
-            <h1 className="form-title">Webinar Dashboard</h1>
+<h1 className="form-title text-3xl font-extrabold">
+  Webinar Dashboard
+</h1>
           </div>
         <header className="wb-header">
           <div className="header-left">
