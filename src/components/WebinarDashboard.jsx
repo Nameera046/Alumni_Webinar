@@ -204,14 +204,11 @@ function DashboardShell() {
                       <div className="muted">Conducted</div> 
                       <div className="large">{totals.conducted}</div> 
                     </div> 
-                    <div> 
-                      <div className="muted">Postponed</div> 
-                      <div className="large">{totals.postponed}
-                    </div> 
-                  </div> 
                   <div>
                     <div className="muted">Speakers</div> 
-                    <div className="large">{totals.totalSpeakers} (+{totals.newSpeakers})</div> 
+                      <div className="large">
+                        {Number(totals.totalSpeakers) + Number(totals.newSpeakers)}
+                      </div>
                   </div> 
                 </div>
               </div>
@@ -251,8 +248,10 @@ function DashboardShell() {
                       <div className="webinar-speakers">
                         <div className="speaker-info">
                           <span className="speaker-icon">👥</span>
-                          <span>Total Speakers: {d.totalSpeakers}</span>
-                          <span className="new-speakers">(+{d.newSpeakers} new)</span>
+                            <span>
+                              Total Speakers:{Number(d.totalSpeakers) + Number(d.newSpeakers)}
+                            </span>
+
                         </div>
                       </div>
                       <div className="webinar-actions">
@@ -366,6 +365,14 @@ function DashboardShell() {
         <span className="qa-tag">Approval</span>
         <p className="qa-desc">
           Review and approve requested webinar topics from students and faculty.
+        </p>
+    </div>
+    <div className="qa-card" onClick={() => navigate("/webinar-circular")} style={{ cursor: "pointer" }}>
+        <div className="qa-icon">📋</div>
+        <h4 className="qa-heading">MonthWise Webinar Circular</h4>
+        <span className="qa-tag">Circular</span>
+        <p className="qa-desc">
+          View and Download the monthly Circular.
         </p>
     </div>
   <div className="qa-card" onClick={() => navigate("/alumni-feedback")} style={{ cursor: "pointer" }}>

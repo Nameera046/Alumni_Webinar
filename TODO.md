@@ -1,8 +1,10 @@
-# TODO for TopicApprovalForm Popup Feature
+# TODO: Disable Auto-Fetch Fields in Forms
 
-- [x] Update imports to include X icon from lucide-react
-- [x] Add new state variables: isPopupOpen and selectedTopic
-- [x] Enhance topics array with mock student data (serialNumber, email, name, department, reason)
-- [x] Modify View button's onClick to open popup and set selectedTopic
-- [x] Add popup JSX with table displaying student details
-- [x] Test popup functionality
+## Tasks
+- [x] Disable Name field in WebinarStudentFeedbackForm.jsx (add readOnly)
+- [x] Disable Contact field in WebinarCompletedDetailsForm.jsx (add readOnly)
+- [x] Disable Name field in WebinarAlumniFeedbackForm.jsx (add readOnly)
+- [x] Disable Name, Contact, Department fields in StudentRequestForm.jsx (add readOnly)
+
+## Followup
+- [ ] Test forms to ensure auto-fetched fields are disabled

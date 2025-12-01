@@ -294,3 +294,67 @@
 .grid-spacing {
   gap: 20px;
 }
+@media (max-width: 768px) {
+  .webinar-poster {
+    width: 100% !important;
+    height: auto !important;
+    transform: scale(0.92);
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .top-header h1 {
+    font-size: 1.6rem !important;
+  }
+
+  .top-header p {
+    font-size: 0.9rem !important;
+  }
+
+  .logo-row img {
+    width: 55px !important;
+    height: 55px !important;
+  }
+
+  .topic-title {
+    font-size: 1.3rem !important;
+    padding: 0 25px !important;
+  }
+
+  .info-box {
+    width: 85% !important;
+    height: auto !important;
+    padding: 12px !important;
+  }
+
+  .info-box p {
+    font-size: 1.2rem !important;
+  }
+
+  .alumni-photo img {
+    width: 150px !important;
+    height: 150px !important;
+  }
+
+  .alumni-details {
+    width: 85% !important;
+    right: 8% !important;
+    height: auto !important;
+    padding: 12px !important;
+  }
+
+  .alumni-details h2 {
+    font-size: 1.3rem !important;
+  }
+
+  .white-bg {
+    width: 200% !important;
+    height: 600px !important;
+    top: 250px !important;
+  }
+
+  .poster-footer img {
+    height: 80px !important;
+    object-fit: cover;
+  }
+}

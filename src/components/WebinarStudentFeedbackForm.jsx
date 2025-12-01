@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { GraduationCap, User, Mail, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Popup from './Popup';
 import "./Common.css";
 
 export default function WebinarStudentFeedbackForm() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,6 +18,37 @@ export default function WebinarStudentFeedbackForm() {
     feedback: "",
     isRobot: false,
   });
+
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+
+  // Auto-fill Name when Email is typed
+  useEffect(() => {
+    const fetchMemberDetails = async () => {
+      if (!formData.email || formData.email.length < 5) return;
+
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/member-by-email?email=${formData.email}`
+        );
+        const data = await res.json();
+
+        console.log("Fetched member:", data);
+
+        if (data?.found) {
+          setFormData((prev) => ({
+            ...prev,
+            name: data.name || "",
+          }));
+        } else {
+          console.log("No member found for entered email");
+        }
+      } catch (err) {
+        console.error("Error fetching member:", err);
+      }
+    };
+
+    fetchMemberDetails();
+  }, [formData.email]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -28,7 +62,7 @@ export default function WebinarStudentFeedbackForm() {
     e.preventDefault();
 
     if (!formData.isRobot) {
-      alert("Please verify that you are not a robot");
+      setPopup({ show: true, message: 'Please verify that you are not a robot', type: 'error' });
       return;
     }
 
@@ -39,12 +73,24 @@ export default function WebinarStudentFeedbackForm() {
       !formData.q2 ||
       !formData.feedback
     ) {
-      alert("Please fill all required fields");
+      setPopup({ show: true, message: 'Please fill all required fields', type: 'error' });
       return;
     }
 
     console.log("Feedback submitted:", formData);
-    alert("Feedback submitted successfully! 🎉");
+    setPopup({ show: true, message: 'Feedback submitted successfully! 🎉', type: 'success' });
+
+    // Reset form data after successful submission
+    setFormData({
+      name: "",
+      email: "",
+      webinar: "",
+      speaker: "",
+      q1: "",
+      q2: "",
+      feedback: "",
+      isRobot: false,
+    });
   };
 
   return (
@@ -60,6 +106,7 @@ export default function WebinarStudentFeedbackForm() {
           <button className="back-btn" onClick={() => navigate("/")}>
             <ArrowLeft className="back-btn-icon" /> Back to Dashboard
           </button>
+
           <div className="form-header">
             <div className="icon-wrapper">
               <GraduationCap className="header-icon" />
@@ -72,22 +119,7 @@ export default function WebinarStudentFeedbackForm() {
 
           <div className="form-card">
             <form className="form-fields" onSubmit={handleSubmit} noValidate>
-              {/* Name */}
-              <div className="form-group">
-                <label>
-                  <User className="field-icon" /> Name{" "}
-                  <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  disabled
-                  placeholder="Auto fetched from profile"
-                  className="input-field"
-                />
-              </div>
-
+              
               {/* Email */}
               <div className="form-group">
                 <label>
@@ -98,27 +130,41 @@ export default function WebinarStudentFeedbackForm() {
                   type="email"
                   name="email"
                   value={formData.email}
-                  disabled
-                  placeholder="Auto fetched from profile"
+                  onChange={handleChange}
+                  placeholder="Enter your email"
                   className="input-field"
+                  required
+                />
+              </div>
+
+              {/* Name */}
+              <div className="form-group">
+                <label>
+                  <User className="field-icon" /> Name{" "}
+                  <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Auto fetched from email"
+                  className="input-field"
+                  required
+                  readOnly
                 />
               </div>
 
               {/* Webinar */}
               <div className="form-group">
-                <label>
-                  Select Webinar Attended <span className="required">*</span>
-                </label>
+                <label>Select Webinar Attended <span className="required">*</span></label>
                 <select
                   className="select-field"
                   name="webinar"
                   value={formData.webinar}
                   onChange={handleChange}
-                  required
                 >
-                  <option value="" disabled>
-                    -- Choose Webinar --
-                  </option>
+                  <option value="" disabled>-- Choose Webinar --</option>
                   <option value="webinar1">Webinar 1</option>
                   <option value="webinar2">Webinar 2</option>
                 </select>
@@ -126,62 +172,41 @@ export default function WebinarStudentFeedbackForm() {
 
               {/* Speaker */}
               <div className="form-group">
-                <label>
-                  Select Speaker of the Webinar{" "}
-                  <span className="required">*</span>
-                </label>
+                <label>Select Speaker <span className="required">*</span></label>
                 <select
                   className="select-field"
                   name="speaker"
                   value={formData.speaker}
                   onChange={handleChange}
-                  required
                 >
-                  <option value="" disabled>
-                    -- Choose Speaker --
-                  </option>
-                  <option value="speaker1">Webinar Speakername 1</option>
-                  <option value="speaker2">Webinar Speakername 2</option>
+                  <option value="" disabled>-- Choose Speaker --</option>
+                  <option value="speaker1">Speaker 1</option>
+                  <option value="speaker2">Speaker 2</option>
                 </select>
               </div>
 
-              {/* Question 1 */}
+              {/* Ratings */}
               <div className="form-group">
                 <label>
-                  1. How would you rate the quality and relevance of the webinar
-                  content? <span className="required">*</span>
+                  1. Rate the quality of the webinar <span className="required">*</span>
                 </label>
                 <div className="radio-group">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <label key={val}>
-                      <input
-                        type="radio"
-                        name="q1"
-                        value={val}
-                        onChange={handleChange}
-                      />{" "}
-                      {val}
+                      <input type="radio" name="q1" value={val} onChange={handleChange} /> {val}
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Question 2 */}
               <div className="form-group">
                 <label>
-                  2. How would you rate the speaker's clarity and engagement?{" "}
-                  <span className="required">*</span>
+                  2. Rate the speaker <span className="required">*</span>
                 </label>
                 <div className="radio-group">
                   {[1, 2, 3, 4, 5].map((val) => (
                     <label key={val}>
-                      <input
-                        type="radio"
-                        name="q2"
-                        value={val}
-                        onChange={handleChange}
-                      />{" "}
-                      {val}
+                      <input type="radio" name="q2" value={val} onChange={handleChange} /> {val}
                     </label>
                   ))}
                 </div>
@@ -190,16 +215,14 @@ export default function WebinarStudentFeedbackForm() {
               {/* Feedback */}
               <div className="form-group">
                 <label>
-                  3. Additional feedback or suggestions{" "}
-                  <span className="required">*</span>
+                  Additional feedback <span className="required">*</span>
                 </label>
                 <textarea
                   name="feedback"
                   value={formData.feedback}
                   onChange={handleChange}
-                  placeholder="Write your feedback here..."
+                  placeholder="Write your feedback..."
                   className="textarea-field"
-                  required
                 ></textarea>
               </div>
 
@@ -215,16 +238,24 @@ export default function WebinarStudentFeedbackForm() {
                 <label className="checkbox-label">I'm not a robot</label>
               </div>
 
-              {/* Button */}
               <button type="submit" className="submit-btn">
                 Submit Feedback
               </button>
+
             </form>
           </div>
 
           <p className="form-footer">Designed with 💜 for Alumni Network</p>
         </div>
       </div>
+
+      {popup.show && (
+        <Popup
+          message={popup.message}
+          type={popup.type}
+          onClose={() => setPopup({ show: false, message: '', type: 'success' })}
+        />
+      )}
     </div>
   );
 }

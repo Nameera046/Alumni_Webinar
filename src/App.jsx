@@ -6,6 +6,7 @@ import StudentRequestForm from "./components/StudentRequestForm";
 import WebinarSpeakerAssignmentForm from "./components/WebinarSpeakerAssignmentForm";
 import WebinarStudentFeedbackForm from "./components/WebinarStudentFeedbackForm";
 import TopicApprovalForm from './components/TopicApprovalForm';
+import WebinarCircular from './components/WebinarCircular';
 import WebinarEvents from './components/WebinarEvents';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/alumni-feedback" element={<WebinarAlumniFeedbackForm />} />
         <Route path="/student-feedback" element={<WebinarStudentFeedbackForm />} />
         <Route path="/requested-topic-approval" element={<TopicApprovalForm />} />
+        <Route path="/webinar-circular" element={<WebinarCircular />} />
       </Routes>
     </Router>
   );

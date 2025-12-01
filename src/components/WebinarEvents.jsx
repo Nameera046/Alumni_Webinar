@@ -5,6 +5,7 @@ import WebinarAlumniFeedbackForm from './WebinarAlumniFeedbackForm';
 import { FiBookOpen, FiAward, FiUpload } from "react-icons/fi";
 import WebinarStudentFeedbackForm from './WebinarStudentFeedbackForm';
 import { GraduationCap, User, Mail,ArrowLeft } from "lucide-react";
+import Popup from './Popup';
 
 export default function WebinarEvents() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export default function WebinarEvents() {
   const [showAlumniFeedback, setShowAlumniFeedback] = useState(false);
   const [showStudentRequest, setShowStudentRequest] = useState(false);
   const [showStudentFeedback, setShowStudentFeedback] = useState(false);
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
 
   const webinars = {
     january: [
@@ -105,7 +107,8 @@ export default function WebinarEvents() {
 
   /** ------------------ Webinar Detail Modal ------------------ */
    const WebinarDetail = ({ webinar, onClose }) => (
-    <div className="fixed inset-5 bg-white/85 bg-opacity-30 flex items-center justify-center p-5 z-50">
+<div className="fixed inset-0 bg-white/85 bg-opacity-30 flex items-center justify-center p-5 z-50">
+
 <div className="bg-gradient-to-br from-purple-50/70 via-pink-50/70 to-blue-50/70 
                 rounded-2xl max-w-2xl w-full shadow-2xl relative overflow-y-auto 
                 max-h-[90vh] hide-scrollbar p-8">
@@ -211,7 +214,7 @@ export default function WebinarEvents() {
             <div className="flex gap-4">
               <button
                 onClick={() => {
-                  alert("Registration successful! 🎉");
+                  setPopup({ show: true, message: 'Registration successful! 🎉', type: 'success' });
                   onClose();
                 }}
                 className="submit-btn"
@@ -292,6 +295,14 @@ return (
       {/* Certificate Download Modal */}
       {showCertificates && (
         <CertificateDownload onClose={() => setShowCertificates(false)} />
+      )}
+
+      {popup.show && (
+        <Popup
+          message={popup.message}
+          type={popup.type}
+          onClose={() => setPopup({ show: false, message: '', type: 'success' })}
+        />
       )}
     </div>
   );
