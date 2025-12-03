@@ -358,3 +358,23 @@
     object-fit: cover;
   }
 }
+.generate-btn {
+  width: 17%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 1rem;
+  background: linear-gradient(to right, #7c3aed, #3b82f6);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+  transition: all 0.3s;
+}
+@media (max-width: 480px) {
+  .generate-btn {
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 0.5rem;
+    border-radius: 0.8rem;
+  }
+}

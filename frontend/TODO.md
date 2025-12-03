@@ -1,10 +1,5 @@
-# TODO: Disable Auto-Fetch Fields in Forms
+# TODO for WebinarEvents Modifications
 
-## Tasks
-- [x] Disable Name field in WebinarStudentFeedbackForm.jsx (add readOnly)
-- [x] Disable Contact field in WebinarCompletedDetailsForm.jsx (add readOnly)
-- [x] Disable Name field in WebinarAlumniFeedbackForm.jsx (add readOnly)
-- [x] Disable Name, Contact, Department fields in StudentRequestForm.jsx (add readOnly)
-
-## Followup
-- [ ] Test forms to ensure auto-fetched fields are disabled
+- [ ] Remove the "Feedback Form" button from the WebinarDetail modal in WebinarEvents.jsx
+- [ ] Add a "Feedback Form" button to the WebinarCard that navigates to "/student-feedback"
+- [ ] Add a disabled "Download Certificate" button to the WebinarCard

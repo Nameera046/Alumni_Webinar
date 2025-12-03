@@ -9,12 +9,13 @@ import Popup from './Popup';
 export default function WebinarSpeakerAssignmentForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '', department: '', batch: '', designation: '', companyName: '', speakerPhoto: null, domain: '', conductingDepartment: '', webinarVenue: 'NEC Auditorium, Kovilpatti', alumniCity: 'Chennai'
+    email: '', name: '', department: '', batch: '', designation: '', companyName: '', speakerPhoto: null, domain: '', conductingDepartment: '', webinarVenue: 'NEC Auditorium, Kovilpatti', alumniCity: 'Chennai', meetingLink: ''
   });
-  const [slots, setSlots] = useState([{ deadline: '2024-12-15', time: '10:00' }]);
+  const [slots, setSlots] = useState([{ deadline: '2024-12-15', webinarDate: '', time: '9:30-10:30' }]);
   const [showPoster, setShowPoster] = useState(false);
   const [photoURL, setPhotoURL] = useState(null);
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (formData.speakerPhoto) {
@@ -37,10 +38,34 @@ export default function WebinarSpeakerAssignmentForm() {
 
   const removeSlot = index => setSlots(slots.filter((_, i) => i !== index));
 
+  const fetchMemberDetails = async (email) => {
+    if (!email) return;
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/member-by-email?email=${encodeURIComponent(email)}`);
+      const data = await response.json();
+      if (data.found) {
+        setFormData(prev => ({
+          ...prev,
+          name: data.name,
+          department: data.department,
+          batch: data.batch
+        }));
+      } else {
+        setPopup({ show: true, message: 'Alumni not found with this email', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error fetching member details:', error);
+      setPopup({ show: true, message: 'Error fetching alumni details', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = () => {
-    if (!formData.name || !formData.department || !formData.batch || !formData.designation ||
+    if (!formData.email || !formData.name || !formData.department || !formData.batch || !formData.designation ||
         !formData.companyName || !formData.speakerPhoto || !formData.domain || !formData.conductingDepartment ||
-        slots.some(s => !s.deadline || !s.time)) {
+        !formData.meetingLink || slots.some(s => !s.deadline || !s.webinarDate || !s.time)) {
       setPopup({ show: true, message: 'Please fill all required fields', type: 'error' });
       return;
     }
@@ -52,7 +77,7 @@ export default function WebinarSpeakerAssignmentForm() {
   const handleGeneratePoster = () => {
     if (!formData.name || !formData.department || !formData.batch || !formData.designation ||
         !formData.companyName || !formData.speakerPhoto || !formData.domain || !formData.conductingDepartment ||
-        slots.some(s => !s.deadline || !s.time)) {
+        slots.some(s => !s.deadline || !s.webinarDate || !s.time)) {
       alert("Please fill all required fields before generating the poster");
       return;
     }
@@ -82,6 +107,13 @@ export default function WebinarSpeakerAssignmentForm() {
           <div className="form-card">
             <div className="form-fields">
               <h2 className="section-heading">Speaker Details</h2>
+              <div className="form-group">
+                <label>
+                  <User className="field-icon" /> Email <span className="required">*</span>
+                </label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} onBlur={(e) => fetchMemberDetails(e.target.value)} placeholder="Enter alumni email" className="input-field" />
+                {loading && <p className="text-sm text-gray-500 mt-1">Fetching details...</p>}
+              </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="form-group">
                   <label>
@@ -94,7 +126,7 @@ export default function WebinarSpeakerAssignmentForm() {
                   <label>
                     <Building2 className="field-icon" /> Department <span className="required">*</span>
                   </label>
-                  <input type="text" name="department" value={formData.department} onChange={handleChange} placeholder="Enter department" className="input-field" />
+                  <input type="text" name="department" value={formData.department} readOnly className="input-field bg-gray-100" />
                 </div>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -102,7 +134,7 @@ export default function WebinarSpeakerAssignmentForm() {
                   <label>
                     <Globe className="field-icon" /> Batch <span className="required">*</span>
                   </label>
-                  <input type="text" name="batch" value={formData.batch} onChange={handleChange} placeholder="Enter batch" className="input-field" />
+                  <input type="text" name="batch" value={formData.batch} readOnly className="input-field bg-gray-100" />
                 </div>
 
                 <div className="form-group">
@@ -136,17 +168,43 @@ export default function WebinarSpeakerAssignmentForm() {
               {/* Domain */}
               <div className="form-group">
                 <label>
-                  <Globe className="field-icon" /> Webinar Topic <span className="required">*</span>
+                  <Globe className="field-icon" /> Domain <span className="required">*</span>
                 </label>
-                <input type="text" name="domain" value={formData.domain} onChange={handleChange} placeholder="Enter webinar topic" className="input-field" />
+
+                <select
+                  name="domain"
+                  value={formData.domain}
+                  onChange={handleChange}
+                  className="input-field"
+                >
+                  <option value="">Select Domain</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Management">Management</option>
+                  <option value="Science">Science</option>
+                  <option value="Arts">Arts</option>
+                </select>
               </div>
 
-              {/* Conducting Department */}
+              {/* Webinar Topic */}
               <div className="form-group">
                 <label>
-                  <Building2 className="field-icon" /> Department Conducting Webinars <span className="required">*</span>
+                  <Building2 className="field-icon" /> Webinar Topic <span className="required">*</span>
                 </label>
-                <input type="text" name="conductingDepartment" value={formData.conductingDepartment} onChange={handleChange} placeholder="Select the department conducting webinars" className="input-field" />
+
+                <select
+                  name="conductingDepartment"
+                  value={formData.conductingDepartment}
+                  onChange={handleChange}
+                  className="input-field"
+                >
+                  <option value="">Select Webinar Topic</option>
+                  <option value="AI and ML">AI & Machine Learning</option>
+                  <option value="Cloud Computing">Cloud Computing</option>
+                  <option value="Cyber Security">Cyber Security</option>
+                  <option value="Full Stack Development">Full Stack Development</option>
+                  <option value="Career Guidance">Career Guidance</option>
+                </select>
               </div>
 
               {/* Webinar Venue and Alumni City */}
@@ -166,13 +224,27 @@ export default function WebinarSpeakerAssignmentForm() {
                 </div>
               </div>
 
+              {/* Meeting Link */}
+              <div className="form-group">
+                <label>
+                  <Globe className="field-icon" /> Meeting Link (if Online) or else enter Offline <span className="required">*</span>
+                </label>
+                <input type="url" name="meetingLink" value={formData.meetingLink} onChange={handleChange} placeholder="Enter meeting link" className="input-field" />
+              </div>
+
               {/* Assign Slot */}
               <h2 className="section-heading">Assign Slot</h2>
               {slots.map((slot, i) => (
-                <div key={i} className="form-card relative grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div key={i} className="form-card relative grid grid-cols-1 lg:grid-cols-3 gap-6">
                   <button type="button" onClick={() => removeSlot(i)} className="remove-slot absolute top-2 right-2">
                     <X className="field-icon" />
                   </button>
+                  <div className="form-group">
+                    <label>
+                      <Calendar className="field-icon" /> WebinarDate <span className="required">*</span>
+                    </label>
+                    <input type="date" value={slot.webinarDate} onChange={e => handleSlotChange(i, "webinarDate", e.target.value)} placeholder="Select date" className="input-field" />
+                  </div>
                   <div className="form-group">
                     <label>
                       <Calendar className="field-icon" /> Deadline <span className="required">*</span>
@@ -183,7 +255,16 @@ export default function WebinarSpeakerAssignmentForm() {
                     <label>
                       <Clock className="field-icon" /> Time <span className="required">*</span>
                     </label>
-                    <input type="time" value={slot.time} onChange={e => handleSlotChange(i, "time", e.target.value)} placeholder="Select time" className="input-field" />
+                    <select value={slot.time} onChange={e => handleSlotChange(i, "time", e.target.value)} className="input-field">
+                      <option value="">Select time slot</option>
+                      <option value="9:30-10:30">9:30-10:30</option>
+                      <option value="10:30-11:30">10:30-11:30</option>
+                      <option value="11:30-12:30">11:30-12:30</option>
+                      <option value="12:30-1:30">12:30-1:30</option>
+                      <option value="1:30-2:30">1:30-2:30</option>
+                      <option value="2:30-3:30">2:30-3:30</option>
+                      <option value="3:30-4:30">3:30-4:30</option>
+                    </select>
                   </div>
                 </div>
               ))}
@@ -202,7 +283,7 @@ export default function WebinarSpeakerAssignmentForm() {
               <WebinarPoster
                 alumniPhoto={photoURL}
                 webinarTopic={formData.domain}
-                webinarDate={slots[0]?.deadline || ''}
+                webinarDate={slots[0]?.webinarDate || ''}
                 webinarTime={slots[0]?.time || ''}
                 webinarVenue={formData.webinarVenue}
                 alumniName={formData.name}

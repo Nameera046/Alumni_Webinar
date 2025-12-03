@@ -87,21 +87,48 @@ export default function WebinarEvents() {
     <div className="form-card p-6 flex flex-col h-full webinar-card">
       <h3 className="text-xl font-bold text-purple-900 mb-4 webinar-card-title">{webinar.title}</h3>
       <div className="bg-purple-50 p-3 rounded-lg mb-4 webinar-card-slot">
-        <p className="text-sm text-gray-700">
+        <p className="text-lg text-gray-700">
           <span className="font-semibold">Slot:</span> {webinar.slot}
         </p>
       </div>
 
-      <p className="text-sm text-gray-700 mb-4 webinar-card-registered">
+      <p className="text-lg text-gray-700 mb-4 webinar-card-registered">
         Registered: <strong>{webinar.registered}</strong>
       </p>
 
-      <button
-        onClick={() => setSelectedWebinar(webinar)}
-        className="submit-btn mt-auto webinar-card-btn"
-      >
-        See Details
-      </button>
+      <p className="text-lg text-gray-700 mb-4">
+        To join the Webinar:{" "}
+        <a
+          href="#"
+          className="text-purple-600 hover:text-purple-800 underline"
+        >
+          Click Here
+        </a>
+      </p>
+
+
+      <div className="mt-auto space-y-2">
+  <button
+    onClick={() => setSelectedWebinar(webinar)}
+    className="submit-btn webinar-card-btn mb-2"
+  >
+    Register
+  </button>
+
+  <button
+    onClick={() => navigate('/student-feedback')}
+    className="submit-btn webinar-card-btn mb-2"
+  >
+    Feedback
+  </button>
+
+  <button
+    className="submit-btn webinar-card-btn mb-2"
+  >
+    Download Certificate
+  </button>
+</div>
+
     </div>
   );
 
@@ -221,12 +248,6 @@ export default function WebinarEvents() {
               >
                 Register Now
               </button>
-              <button
-                onClick={() => navigate("/student-feedback")}
-                className="submit-btn bg-purple-100 hover:bg-purple-200 text-purple-800"
-              >
-                Feedback Form
-              </button>
             </div>
           </div>
         </div>
@@ -259,16 +280,13 @@ return (
                 <FiBookOpen className="header-icon" />
             </div>
             <h1 className="form-title webinar-events-title">Webinar Events</h1>
-            <button
-              onClick={() => setShowStudentFeedback(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors webinar-feedback-btn"
-            >
-              CERTFICATES
-            </button>
           </div>
 
           {/* January List */}
-          <h2 className="text-2xl font-bold text-purple-900 mb-4 mt-4 webinar-section-title">January 2025</h2>
+          <div className="flex justify-between items-center mb-4 mt-4">
+            <h2 className="text-2xl font-bold text-purple-900 webinar-section-title">January 2025</h2>
+            <button className="generate-btn">Generate Circular</button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 webinar-grid">
             {webinars.january.map((wb, i) => (
               <WebinarCard key={i} webinar={wb} />
@@ -276,7 +294,10 @@ return (
           </div>
 
           {/* February List */}
-          <h2 className="text-2xl font-bold text-purple-900 mb-4 mt-4 webinar-section-title">February 2025</h2>
+          <div className="flex justify-between items-center mb-4 mt-4">
+            <h2 className="text-2xl font-bold text-purple-900 webinar-section-title">February 2025</h2>
+            <button className="generate-btn">Generate Circular</button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 webinar-grid">
             {webinars.february.map((wb, i) => (
               <WebinarCard key={i} webinar={wb} />

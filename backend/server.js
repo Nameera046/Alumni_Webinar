@@ -3,6 +3,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+// Import models
+const memberSchema = require('./models/Member');
+const studentFeedbackSchema = require('./models/StudentFeedback');
+
+// Import routes
+const studentFeedbackRoutes = require('./routes/studentFeedback');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -10,27 +17,28 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
+// MongoDB connection for 'test' database
 const mongoURI = process.env.MONGO_URI;
 
 mongoose.connect(mongoURI)
-  .then(() => console.log('MongoDB connected'))
+  .then(() => console.log('MongoDB connected to test database'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Member schema
-const memberSchema = new mongoose.Schema({
-  basic: {
-    name: String,
-    email_id: String,
-    alternate_email_id: String
-  },
-  contact_details: {
-    mobile: String
-  },
-  education_details: Array    // <-- ensures array is stored
-}, { strict: false });
+// Second connection for 'webinar' database
+const webinarConnection = mongoose.createConnection(mongoURI.replace('/test?', '/webinar?'));
+webinarConnection.on('connected', () => console.log('Connected to webinar database'));
+webinarConnection.on('error', (err) => console.error('Webinar DB connection error:', err));
 
+// Create models
 const Member = mongoose.model('Member', memberSchema, 'members');
+const StudentFeedback = webinarConnection.model('StudentFeedback', studentFeedbackSchema, 'studentfeedback');
+
+// Attach models to app locals for use in routes
+app.locals.Member = Member;
+app.locals.StudentFeedback = StudentFeedback;
+
+// Use routes
+app.use('/api', studentFeedbackRoutes);
 
 // API endpoint to get email suggestions
 app.get('/api/emails', async (req, res) => {

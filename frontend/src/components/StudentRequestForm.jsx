@@ -24,6 +24,7 @@ export default function StudentRequestForm() {
     department: '',
     domain: '',
     topic: '',
+    reason: '',
     isRobot: false
   });
 
@@ -92,6 +93,7 @@ export default function StudentRequestForm() {
     if (!formData.department) newErrors.department = 'Department is required';
     if (!formData.domain) newErrors.domain = 'Domain is required';
     if (!formData.topic) newErrors.topic = 'Topic is required';
+    if (!formData.reason) newErrors.reason = 'Reason is required';
 
     setErrors(newErrors);
 
@@ -107,6 +109,7 @@ export default function StudentRequestForm() {
         department: '',
         domain: '',
         topic: '',
+        reason: '',
         isRobot: false
       });
       setErrors({});
@@ -240,6 +243,22 @@ export default function StudentRequestForm() {
                   className="textarea-field"
                 ></textarea>
                 {errors.topic && <div className="error-text">{errors.topic}</div>}
+              </div>
+
+              {/* REASON */}
+              <div className="form-group">
+                <label>
+                  <MessageSquare className="field-icon" /> Reason for Requesting the Topic <span className="required">*</span>
+                </label>
+                <textarea
+                  name="reason"
+                  value={formData.reason}
+                  onChange={handleChange}
+                  placeholder="Explain why you are requesting this topic"
+                  rows="4"
+                  className="textarea-field"
+                ></textarea>
+                {errors.reason && <div className="error-text">{errors.reason}</div>}
               </div>
 
               {/* CAPTCHA */}

@@ -58,7 +58,7 @@ export default function WebinarStudentFeedbackForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.isRobot) {
@@ -77,20 +77,46 @@ export default function WebinarStudentFeedbackForm() {
       return;
     }
 
-    console.log("Feedback submitted:", formData);
-    setPopup({ show: true, message: 'Feedback submitted successfully! 🎉', type: 'success' });
+    try {
+      const response = await fetch('http://localhost:5000/api/submit-student-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          name: formData.name,
+          webinar: formData.webinar,
+          speaker: formData.speaker,
+          q1: parseInt(formData.q1),
+          q2: parseInt(formData.q2),
+          feedback: formData.feedback,
+        }),
+      });
 
-    // Reset form data after successful submission
-    setFormData({
-      name: "",
-      email: "",
-      webinar: "",
-      speaker: "",
-      q1: "",
-      q2: "",
-      feedback: "",
-      isRobot: false,
-    });
+      const data = await response.json();
+
+      if (response.ok) {
+        setPopup({ show: true, message: 'Feedback submitted successfully! 🎉', type: 'success' });
+
+        // Reset form data after successful submission
+        setFormData({
+          name: "",
+          email: "",
+          webinar: "",
+          speaker: "",
+          q1: "",
+          q2: "",
+          feedback: "",
+          isRobot: false,
+        });
+      } else {
+        setPopup({ show: true, message: data.error || 'Failed to submit feedback', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      setPopup({ show: true, message: 'Network error. Please try again.', type: 'error' });
+    }
   };
 
   return (

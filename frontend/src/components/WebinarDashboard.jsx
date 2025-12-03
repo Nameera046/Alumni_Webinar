@@ -44,34 +44,34 @@ const seedPhases = {
   'Phase 1': {
     months: ['Aug', 'Sep', 'Oct', 'Nov'],
     domains: [
-      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 21, postponed: 7, totalSpeakers: 18, newSpeakers: 5 },
-      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 24, postponed: 4, totalSpeakers: 20, newSpeakers: 6 },
-      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 18, postponed: 10, totalSpeakers: 15, newSpeakers: 3 },
-      { id: 'd4', name: 'Data Science', planned: 28, conducted: 22, postponed: 6, totalSpeakers: 17, newSpeakers: 4 },
-      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 25, postponed: 3, totalSpeakers: 13, newSpeakers: 2 },
-      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 12, newSpeakers: 1 }
+      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 21, postponed: 7, totalSpeakers: 18, newSpeakers: 5, requestedTopics: ['React Basics', 'Node.js Fundamentals'], approvedTopics: ['Advanced React', 'Express.js'], completedTopics: ['Intro to Full Stack', 'Database Design'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 24, postponed: 4, totalSpeakers: 20, newSpeakers: 6, requestedTopics: ['Machine Learning Basics', 'Neural Networks'], approvedTopics: ['Deep Learning', 'AI Ethics'], completedTopics: ['Python for AI', 'Data Preprocessing'] },
+      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 18, postponed: 10, totalSpeakers: 15, newSpeakers: 3, requestedTopics: ['Network Security', 'Ethical Hacking'], approvedTopics: ['Cryptography', 'Penetration Testing'], completedTopics: ['Firewall Basics', 'Secure Coding'] },
+      { id: 'd4', name: 'Data Science', planned: 28, conducted: 22, postponed: 6, totalSpeakers: 17, newSpeakers: 4, requestedTopics: ['Statistics for Data Science', 'Big Data'], approvedTopics: ['Machine Learning Models', 'Data Visualization'], completedTopics: ['Intro to Pandas', 'Regression Analysis'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 25, postponed: 3, totalSpeakers: 13, newSpeakers: 2, requestedTopics: ['AWS Basics', 'Docker Containers'], approvedTopics: ['Kubernetes', 'Serverless Computing'], completedTopics: ['Cloud Storage', 'Microservices'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 12, newSpeakers: 1, requestedTopics: ['Arduino Programming', 'IoT Basics'], approvedTopics: ['RTOS', 'Sensor Integration'], completedTopics: ['Microcontrollers', 'Embedded C'] }
     ]
   },
   'Phase 2': {
     months: ['Dec', 'Jan', 'Feb', 'Mar'],
     domains: [
-      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 22, postponed: 6, totalSpeakers: 16, newSpeakers: 4 },
-      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 23, postponed: 5, totalSpeakers: 18, newSpeakers: 5 },
-      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 19, postponed: 9, totalSpeakers: 14, newSpeakers: 3 },
-      { id: 'd4', name: 'Data Science', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 15, newSpeakers: 4 },
-      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 24, postponed: 4, totalSpeakers: 14, newSpeakers: 3 },
-      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 18, postponed: 10, totalSpeakers: 11, newSpeakers: 2 }
+      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 22, postponed: 6, totalSpeakers: 16, newSpeakers: 4, requestedTopics: ['Vue.js Basics', 'MongoDB Fundamentals'], approvedTopics: ['Advanced Vue', 'GraphQL'], completedTopics: ['Intro to Vue', 'REST APIs'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 23, postponed: 5, totalSpeakers: 18, newSpeakers: 5, requestedTopics: ['Computer Vision', 'Reinforcement Learning'], approvedTopics: ['NLP', 'AI in Healthcare'], completedTopics: ['TensorFlow Basics', 'Model Training'] },
+      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 19, postponed: 9, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['Web Security', 'Forensics'], approvedTopics: ['Blockchain Security', 'Incident Response'], completedTopics: ['Encryption', 'Vulnerability Assessment'] },
+      { id: 'd4', name: 'Data Science', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 15, newSpeakers: 4, requestedTopics: ['Time Series Analysis', 'Big Data Analytics'], approvedTopics: ['Deep Learning for Data', 'Data Engineering'], completedTopics: ['NumPy Basics', 'Data Cleaning'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 24, postponed: 4, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['Azure Basics', 'Microservices'], approvedTopics: ['DevOps', 'Cloud Security'], completedTopics: ['AWS Lambda', 'Container Orchestration'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 18, postponed: 10, totalSpeakers: 11, newSpeakers: 2, requestedTopics: ['Raspberry Pi', 'FPGA Programming'], approvedTopics: ['IoT Protocols', 'Real-time Systems'], completedTopics: ['Arduino Advanced', 'Sensor Networks'] }
     ]
   },
   'Phase 3': {
     months: ['Apr', 'May', 'Jun', 'Jul'],
     domains: [
-      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 14, newSpeakers: 3 },
-      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 21, postponed: 7, totalSpeakers: 15, newSpeakers: 4 },
-      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 17, postponed: 11, totalSpeakers: 13, newSpeakers: 2 },
-      { id: 'd4', name: 'Data Science', planned: 28, conducted: 19, postponed: 9, totalSpeakers: 12, newSpeakers: 3 },
-      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 23, postponed: 5, totalSpeakers: 12, newSpeakers: 2 },
-      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 17, postponed: 11, totalSpeakers: 10, newSpeakers: 1 }
+      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['Angular Basics', 'Django Fundamentals'], approvedTopics: ['Advanced Angular', 'RESTful APIs'], completedTopics: ['Intro to Angular', 'Backend Development'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 21, postponed: 7, totalSpeakers: 15, newSpeakers: 4, requestedTopics: ['Generative AI', 'Robotics'], approvedTopics: ['AI Automation', 'Ethics in AI'], completedTopics: ['PyTorch Basics', 'AI Applications'] },
+      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 17, postponed: 11, totalSpeakers: 13, newSpeakers: 2, requestedTopics: ['Cloud Security', 'Malware Analysis'], approvedTopics: ['Zero Trust', 'Digital Forensics'], completedTopics: ['Secure Networks', 'Threat Detection'] },
+      { id: 'd4', name: 'Data Science', planned: 28, conducted: 19, postponed: 9, totalSpeakers: 12, newSpeakers: 3, requestedTopics: ['Predictive Analytics', 'Data Mining'], approvedTopics: ['Big Data Tools', 'Advanced Visualization'], completedTopics: ['Scikit-learn', 'Data Warehousing'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 23, postponed: 5, totalSpeakers: 12, newSpeakers: 2, requestedTopics: ['GCP Basics', 'Edge Computing'], approvedTopics: ['Multi-cloud', 'Cloud Architecture'], completedTopics: ['Serverless Functions', 'Cloud Migration'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 17, postponed: 11, totalSpeakers: 10, newSpeakers: 1, requestedTopics: ['Wearable Tech', 'Automotive Systems'], approvedTopics: ['IoT Security', 'Embedded Linux'], completedTopics: ['Raspberry Pi Projects', 'Embedded Programming'] }
     ]
   }
 };
@@ -311,6 +311,21 @@ function DashboardShell() {
                   <div className="stat">
                     <div className="label">Completion Rate</div>
                     <div className="value">{selectedDomain.planned > 0 ? Math.round((selectedDomain.conducted / selectedDomain.planned) * 100) : 0}%</div>
+                  </div>
+                </div>
+
+                <div className="stats-grid">
+                  <div className="stat">
+                    <div className="label">Requested Topics</div>
+                    <div className="value">{selectedDomain.requestedTopics?.length || 0}</div>
+                  </div>
+                  <div className="stat">
+                    <div className="label">Approved Topics</div>
+                    <div className="value">{selectedDomain.approvedTopics?.length || 0}</div>
+                  </div>
+                  <div className="stat">
+                    <div className="label">Completed Topics</div>
+                    <div className="value">{selectedDomain.completedTopics?.length || 0}</div>
                   </div>
                 </div>
 
