@@ -9,4 +9,13 @@ export default defineConfig({
     outDir: "build",
     minify: false,
   },
+  server: {
+    proxy: {
+      '/uploads': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
 });

@@ -4,6 +4,8 @@ import './WebinarDashboard.css';
 import './Common.css';
 import { GraduationCap, ArrowLeft} from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, AlignmentType } from 'docx';
+import { saveAs } from 'file-saver';
 
 
 /*
@@ -27,9 +29,25 @@ import { useNavigate } from "react-router-dom";
 const PhaseContext = createContext();
 export const usePhase = () => useContext(PhaseContext);
 
+const generatePhases = () => {
+  const basePhases = ['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4', 'Phase 5'];
+  const now = new Date();
+  if (now >= new Date('2025-10-01')) {
+    basePhases.push('Phase 6');
+  }
+  if (now >= new Date('2026-10-01')) {
+    basePhases.push('Phase 7');
+  }
+  if (now >= new Date('2027-10-01')) {
+    basePhases.push('Phase 8');
+  }
+  // Add more phases as needed in future
+  return basePhases;
+};
+
 const PhaseProvider = ({ children }) => {
-  const phases = ['Phase 1', 'Phase 2', 'Phase 3'];
-  const [selectedPhase, setSelectedPhase] = useState(phases[0]);
+  const phases = generatePhases();
+  const [selectedPhase, setSelectedPhase] = useState(phases[0]); // Default to Phase 1
   return (
     <PhaseContext.Provider value={{ phases, selectedPhase, setSelectedPhase }}>
       {children}
@@ -42,44 +60,101 @@ const PhaseProvider = ({ children }) => {
 // -----------------------
 const seedPhases = {
   'Phase 1': {
-    months: ['Aug', 'Sep', 'Oct', 'Nov'],
-    domains: [
-      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 21, postponed: 7, totalSpeakers: 18, newSpeakers: 5, requestedTopics: ['React Basics', 'Node.js Fundamentals'], approvedTopics: ['Advanced React', 'Express.js'], completedTopics: ['Intro to Full Stack', 'Database Design'] },
-      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 24, postponed: 4, totalSpeakers: 20, newSpeakers: 6, requestedTopics: ['Machine Learning Basics', 'Neural Networks'], approvedTopics: ['Deep Learning', 'AI Ethics'], completedTopics: ['Python for AI', 'Data Preprocessing'] },
-      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 18, postponed: 10, totalSpeakers: 15, newSpeakers: 3, requestedTopics: ['Network Security', 'Ethical Hacking'], approvedTopics: ['Cryptography', 'Penetration Testing'], completedTopics: ['Firewall Basics', 'Secure Coding'] },
-      { id: 'd4', name: 'Data Science', planned: 28, conducted: 22, postponed: 6, totalSpeakers: 17, newSpeakers: 4, requestedTopics: ['Statistics for Data Science', 'Big Data'], approvedTopics: ['Machine Learning Models', 'Data Visualization'], completedTopics: ['Intro to Pandas', 'Regression Analysis'] },
-      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 25, postponed: 3, totalSpeakers: 13, newSpeakers: 2, requestedTopics: ['AWS Basics', 'Docker Containers'], approvedTopics: ['Kubernetes', 'Serverless Computing'], completedTopics: ['Cloud Storage', 'Microservices'] },
-      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 12, newSpeakers: 1, requestedTopics: ['Arduino Programming', 'IoT Basics'], approvedTopics: ['RTOS', 'Sensor Integration'], completedTopics: ['Microcontrollers', 'Embedded C'] }
-    ]
+months: ['Jun 2023', 'Jul 2023', 'Aug 2023', 'Sep 2023'],
+domains: [
+  { id: 'd1', name: 'Full Stack Development', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 0, newSpeakers: 4, requestedTopics: ['Machine Learning Basics', 'Neural Networks'], approvedTopics: ['Deep Learning', 'AI Ethics'], completedTopics: ['Python for AI', 'Data Preprocessing'] },
+       { id: 'd2', name: 'Artificial Intelligence', planned: 4, conducted: 2, postponed: 0, totalSpeakers: 0, newSpeakers: 2, requestedTopics: ['Machine Learning Basics', 'Neural Networks'], approvedTopics: ['Deep Learning', 'AI Ethics'], completedTopics: ['Python for AI', 'Data Preprocessing'] },
+      { id: 'd3', name: 'Cyber Security', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 0, newSpeakers: 2, requestedTopics: ['Network Security', 'Ethical Hacking'], approvedTopics: ['Cryptography', 'Penetration Testing'], completedTopics: ['Firewall Basics', 'Secure Coding'] },
+      { id: 'd4', name: 'Data Science', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 0, newSpeakers: 4, requestedTopics: ['Statistics for Data Science', 'Big Data'], approvedTopics: ['Machine Learning Models', 'Data Visualization'], completedTopics: ['Intro to Pandas', 'Regression Analysis'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 0, newSpeakers: 4, requestedTopics: ['AWS Basics', 'Docker Containers'], approvedTopics: ['Kubernetes', 'Serverless Computing'], completedTopics: ['Cloud Storage', 'Microservices'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 0, newSpeakers: 4, requestedTopics: ['Arduino Programming', 'IoT Basics'], approvedTopics: ['RTOS', 'Sensor Integration'], completedTopics: ['Microcontrollers', 'Embedded C'] },
+      { id: 'd7', name: 'DevOps', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 0, newSpeakers: 4, requestedTopics: ['Version Control', 'Continuous Integration'], approvedTopics: ['CI/CD Pipelines', 'Automation Tools'], completedTopics: ['Git Basics', 'Jenkins Setup'] }
+]
   },
   'Phase 2': {
-    months: ['Dec', 'Jan', 'Feb', 'Mar'],
+    months: ['Dec 2023', 'Jan 2024', 'Feb 2024', 'Mar 2024'],
     domains: [
-      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 22, postponed: 6, totalSpeakers: 16, newSpeakers: 4, requestedTopics: ['Vue.js Basics', 'MongoDB Fundamentals'], approvedTopics: ['Advanced Vue', 'GraphQL'], completedTopics: ['Intro to Vue', 'REST APIs'] },
-      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 23, postponed: 5, totalSpeakers: 18, newSpeakers: 5, requestedTopics: ['Computer Vision', 'Reinforcement Learning'], approvedTopics: ['NLP', 'AI in Healthcare'], completedTopics: ['TensorFlow Basics', 'Model Training'] },
-      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 19, postponed: 9, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['Web Security', 'Forensics'], approvedTopics: ['Blockchain Security', 'Incident Response'], completedTopics: ['Encryption', 'Vulnerability Assessment'] },
-      { id: 'd4', name: 'Data Science', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 15, newSpeakers: 4, requestedTopics: ['Time Series Analysis', 'Big Data Analytics'], approvedTopics: ['Deep Learning for Data', 'Data Engineering'], completedTopics: ['NumPy Basics', 'Data Cleaning'] },
-      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 24, postponed: 4, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['Azure Basics', 'Microservices'], approvedTopics: ['DevOps', 'Cloud Security'], completedTopics: ['AWS Lambda', 'Container Orchestration'] },
-      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 18, postponed: 10, totalSpeakers: 11, newSpeakers: 2, requestedTopics: ['Raspberry Pi', 'FPGA Programming'], approvedTopics: ['IoT Protocols', 'Real-time Systems'], completedTopics: ['Arduino Advanced', 'Sensor Networks'] }
+      { id: 'd1', name: 'Full Stack Development', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 4, newSpeakers: 4, requestedTopics: ['Vue.js Basics', 'MongoDB Fundamentals'], approvedTopics: ['Advanced Vue', 'GraphQL'], completedTopics: ['Intro to Vue', 'REST APIs'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 4, conducted: 2, postponed: 0, totalSpeakers: 2, newSpeakers: 3, requestedTopics: ['Computer Vision', 'Reinforcement Learning'], approvedTopics: ['NLP', 'AI in Healthcare'], completedTopics: ['TensorFlow Basics', 'Model Training'] },
+      { id: 'd3', name: 'Cyber Security', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 2, newSpeakers: 3, requestedTopics: ['Web Security', 'Forensics'], approvedTopics: ['Blockchain Security', 'Incident Response'], completedTopics: ['Encryption', 'Vulnerability Assessment'] },
+      { id: 'd4', name: 'Data Science', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 4, newSpeakers: 3, requestedTopics: ['Time Series Analysis', 'Big Data Analytics'], approvedTopics: ['Deep Learning for Data', 'Data Engineering'], completedTopics: ['NumPy Basics', 'Data Cleaning'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 4, newSpeakers: 4, requestedTopics: ['Azure Basics', 'Microservices'], approvedTopics: ['DevOps', 'Cloud Security'], completedTopics: ['AWS Lambda', 'Container Orchestration'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 4, newSpeakers: 4, requestedTopics: ['Raspberry Pi', 'FPGA Programming'], approvedTopics: ['IoT Protocols', 'Real-time Systems'], completedTopics: ['Arduino Advanced', 'Sensor Networks'] },
+      { id: 'd7', name: 'DevOps', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 4, newSpeakers: 4, requestedTopics: ['Version Control', 'Continuous Integration'], approvedTopics: ['CI/CD Pipelines', 'Automation Tools'], completedTopics: ['Git Basics', 'Jenkins Setup'] }
     ]
   },
   'Phase 3': {
-    months: ['Apr', 'May', 'Jun', 'Jul'],
+    months: ['Jul 2024', 'Aug 2024', 'Sep 2024', 'Oct 2024'],
     domains: [
-      { id: 'd1', name: 'Full Stack Development', planned: 28, conducted: 20, postponed: 8, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['Angular Basics', 'Django Fundamentals'], approvedTopics: ['Advanced Angular', 'RESTful APIs'], completedTopics: ['Intro to Angular', 'Backend Development'] },
-      { id: 'd2', name: 'Artificial Intelligence', planned: 28, conducted: 21, postponed: 7, totalSpeakers: 15, newSpeakers: 4, requestedTopics: ['Generative AI', 'Robotics'], approvedTopics: ['AI Automation', 'Ethics in AI'], completedTopics: ['PyTorch Basics', 'AI Applications'] },
-      { id: 'd3', name: 'Cyber Security', planned: 28, conducted: 17, postponed: 11, totalSpeakers: 13, newSpeakers: 2, requestedTopics: ['Cloud Security', 'Malware Analysis'], approvedTopics: ['Zero Trust', 'Digital Forensics'], completedTopics: ['Secure Networks', 'Threat Detection'] },
-      { id: 'd4', name: 'Data Science', planned: 28, conducted: 19, postponed: 9, totalSpeakers: 12, newSpeakers: 3, requestedTopics: ['Predictive Analytics', 'Data Mining'], approvedTopics: ['Big Data Tools', 'Advanced Visualization'], completedTopics: ['Scikit-learn', 'Data Warehousing'] },
-      { id: 'd5', name: 'Cloud Computing', planned: 28, conducted: 23, postponed: 5, totalSpeakers: 12, newSpeakers: 2, requestedTopics: ['GCP Basics', 'Edge Computing'], approvedTopics: ['Multi-cloud', 'Cloud Architecture'], completedTopics: ['Serverless Functions', 'Cloud Migration'] },
-      { id: 'd6', name: 'Embedded Systems', planned: 28, conducted: 17, postponed: 11, totalSpeakers: 10, newSpeakers: 1, requestedTopics: ['Wearable Tech', 'Automotive Systems'], approvedTopics: ['IoT Security', 'Embedded Linux'], completedTopics: ['Raspberry Pi Projects', 'Embedded Programming'] }
+      { id: 'd1', name: 'Full Stack Development', planned:4, conducted: 4, postponed: 0, totalSpeakers: 8, newSpeakers: 4, requestedTopics: ['Angular Basics', 'Django Fundamentals'], approvedTopics: ['Advanced Angular', 'RESTful APIs'], completedTopics: ['Intro to Angular', 'Backend Development'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 5, newSpeakers: 4, requestedTopics: ['Generative AI', 'Robotics'], approvedTopics: ['AI Automation', 'Ethics in AI'], completedTopics: ['PyTorch Basics', 'AI Applications'] },
+      { id: 'd3', name: 'Cyber Security', planned: 4, conducted: 3, postponed: 1, totalSpeakers: 5, newSpeakers: 3, requestedTopics: ['Cloud Security', 'Malware Analysis'], approvedTopics: ['Zero Trust', 'Digital Forensics'], completedTopics: ['Secure Networks', 'Threat Detection'] },
+      { id: 'd4', name: 'Data Science', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 7, newSpeakers: 4, requestedTopics: ['Predictive Analytics', 'Data Mining'], approvedTopics: ['Big Data Tools', 'Advanced Visualization'], completedTopics: ['Scikit-learn', 'Data Warehousing'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 4, conducted: 4, postponed: 0, totalSpeakers:8, newSpeakers: 4, requestedTopics: ['GCP Basics', 'Edge Computing'], approvedTopics: ['Multi-cloud', 'Cloud Architecture'], completedTopics: ['Serverless Functions', 'Cloud Migration'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 10, newSpeakers: 4, requestedTopics: ['Wearable Tech', 'Automotive Systems'], approvedTopics: ['IoT Security', 'Embedded Linux'], completedTopics: ['Raspberry Pi Projects', 'Embedded Programming'] },
+      { id: 'd7', name: 'DevOps', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 8, newSpeakers: 4, requestedTopics: ['Version Control', 'Continuous Integration'], approvedTopics: ['CI/CD Pipelines', 'Automation Tools'], completedTopics: ['Git Basics', 'Jenkins Setup'] }
     ]
-  }
+  },
+  'Phase 4': {
+    months: ['Jan 2025', 'Feb 2025', 'Mar 2025', 'Apr 2025'],
+    domains: [
+      { id: 'd1', name: 'Full Stack Development', planned: 6, conducted: 6, postponed: 0, totalSpeakers: 12, newSpeakers: 5, requestedTopics: ['Svelte Basics', 'PostgreSQL Fundamentals'], approvedTopics: ['Advanced Svelte', 'GraphQL APIs'], completedTopics: ['Intro to Svelte', 'Database Optimization'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 5, conducted: 5, postponed: 0, totalSpeakers: 9, newSpeakers: 5, requestedTopics: ['Quantum Computing', 'AI in Finance'], approvedTopics: ['Quantum AI', 'Financial Modeling'], completedTopics: ['Quantum Basics', 'AI Trading'] },
+      { id: 'd3', name: 'Cyber Security', planned: 5, conducted: 4, postponed: 1, totalSpeakers: 8, newSpeakers: 4, requestedTopics: ['AI Security', 'Quantum Cryptography'], approvedTopics: ['AI Threat Detection', 'Quantum Security'], completedTopics: ['AI Vulnerabilities', 'Quantum Encryption'] },
+      { id: 'd4', name: 'Data Science', planned: 5, conducted: 4, postponed: 1, totalSpeakers: 11, newSpeakers: 4, requestedTopics: ['Quantum Data Analysis', 'AI-Driven Insights'], approvedTopics: ['Quantum ML', 'AI Data Mining'], completedTopics: ['Quantum Statistics', 'AI Data Processing'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 5, conducted: 4, postponed: 1, totalSpeakers: 12, newSpeakers: 4, requestedTopics: ['Quantum Cloud', 'AI Cloud Services'], approvedTopics: ['Quantum Computing Cloud', 'AI Cloud'], completedTopics: ['Quantum Infrastructure', 'AI Cloud Deployment'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 5, conducted: 4, postponed: 1, totalSpeakers: 14, newSpeakers: 4, requestedTopics: ['Quantum Embedded', 'AI Embedded Systems'], approvedTopics: ['Quantum IoT', 'AI Sensors'], completedTopics: ['Quantum Chips', 'AI Embedded Programming'] },
+      { id: 'd7', name: 'DevOps', planned: 5, conducted: 4, postponed: 1, totalSpeakers: 12, newSpeakers: 4, requestedTopics: ['Version Control', 'Continuous Integration'], approvedTopics: ['CI/CD Pipelines', 'Automation Tools'], completedTopics: ['Git Basics', 'Jenkins Setup'] }
+    ]
+  },
+  'Phase 5': {
+    months: ['Jul 2025', 'Aug 2025', 'Sep 2025', 'Oct 2025'],
+    domains: [
+      { id: 'd1', name: 'Full Stack Development', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 17, newSpeakers: 4, requestedTopics: ['Blockchain Development', 'Web3 Basics'], approvedTopics: ['Smart Contracts', 'Decentralized Apps'], completedTopics: ['Blockchain Fundamentals', 'Web3 Integration'] },
+      { id: 'd2', name: 'Artificial Intelligence', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 14, newSpeakers: 3, requestedTopics: ['AGI Development', 'AI Ethics Advanced'], approvedTopics: ['General AI', 'AI Governance'], completedTopics: ['AGI Concepts', 'Ethical AI Deployment'] },
+      { id: 'd3', name: 'Cyber Security', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 12, newSpeakers: 4, requestedTopics: ['Blockchain Security', 'Web3 Threats'], approvedTopics: ['Crypto Security', 'DeFi Security'], completedTopics: ['Blockchain Vulnerabilities', 'Web3 Encryption'] },
+      { id: 'd4', name: 'Data Science', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 15, newSpeakers: 4, requestedTopics: ['Blockchain Data', 'Web3 Analytics'], approvedTopics: ['Crypto Data Analysis', 'DeFi Data'], completedTopics: ['Blockchain Statistics', 'Web3 Data Mining'] },
+      { id: 'd5', name: 'Cloud Computing', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 16, newSpeakers: 3, requestedTopics: ['Blockchain Cloud', 'Web3 Infrastructure'], approvedTopics: ['Decentralized Cloud', 'Web3 Hosting'], completedTopics: ['Blockchain Cloud Services', 'Web3 Deployment'] },
+      { id: 'd6', name: 'Embedded Systems', planned: 4, conducted: 3, postponed:1, totalSpeakers: 18, newSpeakers: 3, requestedTopics: ['Blockchain IoT', 'Web3 Embedded'], approvedTopics: ['Smart Device Security', 'Decentralized IoT'], completedTopics: ['Blockchain Sensors', 'Web3 Embedded Systems'] },
+      { id: 'd7', name: 'DevOps', planned: 4, conducted: 4, postponed: 0, totalSpeakers: 16, newSpeakers: 4, requestedTopics: ['Version Control', 'Continuous Integration'], approvedTopics: ['CI/CD Pipelines', 'Automation Tools'], completedTopics: ['Git Basics', 'Jenkins Setup'] }
+    ]
+  },
+
+};
+
+// Generate initial data for new phases after Phase 5
+const generateInitialData = (phaseNumber) => {
+  const prevPhase = `Phase ${phaseNumber - 1}`;
+  const prevData = seedPhases[prevPhase];
+  if (!prevData) return null;
+
+  const monthMappings = {
+    6: ['Dec 2025', 'Jan 2026', 'Feb 2026', 'Mar 2026'],
+    7: ['Jul 2026', 'Aug 2026', 'Sep 2026', 'Oct 2026'],
+    8: ['Jan 2027', 'Feb 2027', 'Mar 2027', 'Apr 2027'],
+    // Add more phases as needed
+  };
+
+  return {
+    months: monthMappings[phaseNumber] || [],
+    domains: prevData.domains.map(d => ({
+      ...d,
+      planned: 0,
+      conducted: 0,
+      postponed: 0,
+      totalSpeakers: d.totalSpeakers + d.newSpeakers, // Domain-wise cumulative speakers
+      newSpeakers: 0,
+      requestedTopics: [],
+      approvedTopics: [],
+      completedTopics: []
+    }))
+  };
 };
 
 // -----------------------
 // Utility helpers
 // -----------------------
-const COLORS = ['#4f46e5', '#06b6d4', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6'];
+const COLORS = ['#4f46e5', '#06b6d4', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#6366f1'];
 
 function paginate(array, page = 1, pageSize = 5) {
   const start = (page - 1) * pageSize;
@@ -106,11 +181,259 @@ function DashboardShell() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(5);
   const [collegeTheme, setCollegeTheme] = useState('default'); // default or college
+  const [phase6Data, setPhase6Data] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // When phase changes reset page
   useEffect(() => setPage(1), [selectedPhase, view]);
-  const navigate = useNavigate(); 
-  const phaseData = seedPhases[selectedPhase];
+
+  // Fetch Phase 6 data from API
+  useEffect(() => {
+    if (selectedPhase === 'Phase 6') {
+      setLoading(true);
+      fetch('/api/dashboard-stats?phase=Phase 6')
+        .then(response => response.json())
+        .then(data => {
+          setPhase6Data(data);
+          setLoading(false);
+        })
+        .catch(error => {
+          console.error('Error fetching Phase 6 data:', error);
+          setLoading(false);
+        });
+    } else {
+      setPhase6Data(null);
+    }
+  }, [selectedPhase]);
+
+  const navigate = useNavigate();
+
+  const downloadOverallReport = async () => {
+    const columnWidths = [20, 8, 8, 8, 10, 10]; // Domain, Planned, Conducted, Postponed, Total Speakers, New Speakers
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: {
+            page: {
+              size: {
+                width: 11906,
+                height: 16838,
+              },
+              margin: {
+                top: 720,
+                bottom: 720,
+                left: 720,
+                right: 720,
+              },
+            },
+          },
+          children: [
+            /* ---------------- HEADER ---------------- */
+            new Paragraph({
+              children: [new TextRun({ text: "NATIONAL ENGINEERING COLLEGE", bold: true, size: 34, font: 'Times New Roman' })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "(An Autonomous Institution, Affiliated to Anna University–Chennai)", size: 24, font: 'Times New Roman' })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 80 },
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "K.R. NAGAR, KOVILPATTI – 628 503", size: 24, font: 'Times New Roman' })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 150 },
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: "NEC ALUMNI ASSOCIATION", bold: true, size: 30, font: 'Times New Roman' })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 150 },
+            }),
+            /* ---------------- REPORT TITLE ---------------- */
+            new Paragraph({
+              children: [new TextRun({ text: `Overall Webinar Report - ${selectedPhase}`, bold: true, size: 28, font: 'Times New Roman' })],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 },
+            }),
+            /* ---------------- DATE ---------------- */
+            new Paragraph({
+              children: [new TextRun({ text: `Generated on: ${new Date().toLocaleDateString()}`, size: 24, font: 'Times New Roman' })],
+              alignment: AlignmentType.RIGHT,
+              spacing: { after: 300 },
+            }),
+            /* ---------------- SUMMARY ---------------- */
+            new Paragraph({
+              children: [new TextRun({ text: "Summary Statistics", bold: true, size: 26, font: 'Times New Roman' })],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: `Total Planned Webinars: ${totals.planned}`, size: 24, font: 'Times New Roman' }),
+              ],
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: `Total Conducted Webinars: ${totals.conducted}`, size: 24, font: 'Times New Roman' }),
+              ],
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: `Total Postponed Webinars: ${totals.postponed}`, size: 24, font: 'Times New Roman' }),
+              ],
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: `Total Speakers: ${Number(totals.totalSpeakers) + Number(totals.newSpeakers)}`, size: 24, font: 'Times New Roman' }),
+              ],
+              spacing: { after: 400 },
+            }),
+            /* ---------------- MAIN TABLE ---------------- */
+            new Paragraph({
+              children: [new TextRun({ text: "Domain-wise Details", bold: true, size: 26, font: 'Times New Roman' })],
+              spacing: { after: 200 },
+            }),
+            new Table({
+              width: { size: 100, type: "pct" },
+              alignment: AlignmentType.CENTER,
+              borders: {
+                top: { style: "single", size: 1 },
+                bottom: { style: "single", size: 1 },
+                left: { style: "single", size: 1 },
+                right: { style: "single", size: 1 },
+                insideVertical: { style: "single", size: 1 },
+                insideHorizontal: { style: "single", size: 1 },
+              },
+              rows: [
+                /* HEADERS */
+                new TableRow({
+                  tableHeader: true,
+                  children: [
+                    new TableCell({ width: { size: columnWidths[0], type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Domain", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ width: { size: columnWidths[1], type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Planned", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ width: { size: columnWidths[2], type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Conducted", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ width: { size: columnWidths[3], type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Postponed", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ width: { size: columnWidths[4], type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Total Speakers", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ width: { size: columnWidths[5], type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "New Speakers", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                  ],
+                }),
+                /* DATA ROWS */
+                ...phaseData.domains.map((domain) =>
+                  new TableRow({
+                    children: [
+                      new TableCell({
+                        width: { size: columnWidths[0], type: "pct" },
+                        children: [new Paragraph({ text: domain.name, alignment: AlignmentType.LEFT })]
+                      }),
+                      new TableCell({
+                        width: { size: columnWidths[1], type: "pct" },
+                        children: [new Paragraph({ text: domain.planned.toString(), alignment: AlignmentType.CENTER })]
+                      }),
+                      new TableCell({
+                        width: { size: columnWidths[2], type: "pct" },
+                        children: [new Paragraph({ text: domain.conducted.toString(), alignment: AlignmentType.CENTER })]
+                      }),
+                      new TableCell({
+                        width: { size: columnWidths[3], type: "pct" },
+                        children: [new Paragraph({ text: domain.postponed.toString(), alignment: AlignmentType.CENTER })]
+                      }),
+                      new TableCell({
+                        width: { size: columnWidths[4], type: "pct" },
+                        children: [new Paragraph({ text: (Number(domain.totalSpeakers) + Number(domain.newSpeakers)).toString(), alignment: AlignmentType.CENTER })]
+                      }),
+                      new TableCell({
+                        width: { size: columnWidths[5], type: "pct" },
+                        children: [new Paragraph({ text: domain.newSpeakers.toString(), alignment: AlignmentType.CENTER })]
+                      }),
+                    ],
+                  })
+                ),
+              ],
+            }),
+            /* ---------------- DETAILED DOMAIN REPORTS ---------------- */
+            ...phaseData.domains.flatMap((domain) => [
+              new Paragraph({
+                children: [new TextRun({ text: `Detailed Report for ${domain.name}`, bold: true, size: 26, font: 'Times New Roman' })],
+                spacing: { after: 200, before: 400 },
+              }),
+              new Table({
+                width: { size: 100, type: "pct" },
+                alignment: AlignmentType.CENTER,
+                borders: {
+                  top: { style: "single", size: 1 },
+                  bottom: { style: "single", size: 1 },
+                  left: { style: "single", size: 1 },
+                  right: { style: "single", size: 1 },
+                  insideVertical: { style: "single", size: 1 },
+                  insideHorizontal: { style: "single", size: 1 },
+                },
+                rows: [
+                  new TableRow({
+                    tableHeader: true,
+children: [
+                      new TableCell({ width: { size: 12, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Alumni Name", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 8, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Batch", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 12, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Designation", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 16, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Webinar Topic", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 8, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Date", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 8, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Time", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 10, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Registered Count", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+                      new TableCell({ width: { size: 10, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Attended Count", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+
+  // ⭐ Increased width here
+                      new TableCell({ width: { size: 30, type: "pct" }, children: [new Paragraph({ children: [new TextRun({ text: "Prize Winner Details", bold: true, font: 'Times New Roman' })], alignment: AlignmentType.CENTER })] }),
+],
+
+                  }),
+                  ...Array(domain.conducted).fill(0).map(() =>
+                    new TableRow({
+                      children: [
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                        new TableCell({ children: [new Paragraph({ text: "", alignment: AlignmentType.CENTER })] }),
+                      ],
+                    })
+                  ),
+                ],
+              }),
+            ]),
+          ],
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Overall_Report_${selectedPhase.replace(' ', '_')}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const getPhaseData = (phase) => {
+    if (phase === 'Phase 6' && phase6Data) {
+      return phase6Data;
+    } else if (seedPhases[phase]) {
+      return seedPhases[phase];
+    } else {
+      const phaseNumber = parseInt(phase.split(' ')[1]);
+      return generateInitialData(phaseNumber);
+    }
+  };
+
+  const phaseData = getPhaseData(selectedPhase);
 
   // Derived totals
   const totals = useMemo(() => {
@@ -172,13 +495,14 @@ function DashboardShell() {
                 ))}
               </select>
 
-              {/* Existing search box */}
-              <input
-                className="search"
-                placeholder="Search domains..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              {/* Overall Report Button */}
+              <button
+                className="btn-primary"
+                onClick={downloadOverallReport}
+                disabled={parseInt(selectedPhase.split(' ')[1]) < 6}
+              >
+                Overall Report
+              </button>
             </div>
         </header>
         <section className="wb-content">
@@ -314,6 +638,7 @@ function DashboardShell() {
                   </div>
                 </div>
 
+                {selectedPhase === 'Phase 6' && (
                 <div className="stats-grid">
                   <div className="stat">
                     <div className="label">Requested Topics</div>
@@ -328,6 +653,7 @@ function DashboardShell() {
                     <div className="value">{selectedDomain.completedTopics?.length || 0}</div>
                   </div>
                 </div>
+                )}
 
                 <div className="modal-actions">
                   <button className="btn-primary" onClick={() => alert('Open manage speakers')}>Manage Speakers</button>
@@ -366,28 +692,12 @@ function DashboardShell() {
         Assign speakers to webinars and manage availability, schedules and confirmations.
       </p>
     </div>
-    <div className="qa-card" onClick={() => navigate("/webinar-details-upload")} style={{ cursor: "pointer" }}>
-        <div className="qa-icon">🗂️</div>
-        <h4 className="qa-heading">Webinar Details Upload</h4>
-        <span className="qa-tag">Upload</span>
-        <p className="qa-desc">
-          Upload webinar materials, attendance, resources and summary documentation.
-        </p>
-    </div>
     <div className="qa-card" onClick={() => navigate("/requested-topic-approval")} style={{ cursor: "pointer" }}>
         <div className="qa-icon">✅</div>
         <h4 className="qa-heading">Requested Topic Approval</h4>
         <span className="qa-tag">Approval</span>
         <p className="qa-desc">
           Review and approve requested webinar topics from students and faculty.
-        </p>
-    </div>
-    <div className="qa-card" onClick={() => navigate("/webinar-circular")} style={{ cursor: "pointer" }}>
-        <div className="qa-icon">📋</div>
-        <h4 className="qa-heading">MonthWise Webinar Circular</h4>
-        <span className="qa-tag">Circular</span>
-        <p className="qa-desc">
-          View and Download the monthly Circular.
         </p>
     </div>
   <div className="qa-card" onClick={() => navigate("/alumni-feedback")} style={{ cursor: "pointer" }}>
@@ -398,15 +708,6 @@ function DashboardShell() {
         Collect and manage alumni feedback regarding sessions and overall engagement.
       </p>
     </div>
-  <div className="qa-card" onClick={() => navigate("/student-feedback")} style={{ cursor: "pointer" }}>
-      <div className="qa-icon">🎓</div>
-      <h4 className="qa-heading">Student Feedback Form</h4>
-      <span className="qa-tag">Feedback</span>
-      <p className="qa-desc">
-        Capture student experience, learning outcomes and effectiveness of webinars.
-      </p>
-    </div>
-
   </div>
 </div>
 

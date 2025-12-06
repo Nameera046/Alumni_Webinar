@@ -79,7 +79,7 @@ export default function StudentRequestForm() {
   };
 
   // Submit Form
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {};
 
     if (!formData.isRobot) {
@@ -89,7 +89,7 @@ export default function StudentRequestForm() {
 
     if (!formData.name) newErrors.name = 'Name is required';
     if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.contact) newErrors.contact = 'Contact No is required';
+    // if (!formData.contact) newErrors.contact = 'Contact No is required';
     if (!formData.department) newErrors.department = 'Department is required';
     if (!formData.domain) newErrors.domain = 'Domain is required';
     if (!formData.topic) newErrors.topic = 'Topic is required';
@@ -98,21 +98,43 @@ export default function StudentRequestForm() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log('Form submitted:', formData);
-      setPopup({ show: true, message: 'Form submitted successfully! 🎉', type: 'success' });
+      try {
+        const response = await fetch('http://localhost:5000/api/submit-student-request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            domain: formData.domain,
+            topic: formData.topic,
+            reason: formData.reason,
+          }),
+        });
 
-      // Reset form data after successful submission
-      setFormData({
-        name: '',
-        email: '',
-        contact: '',
-        department: '',
-        domain: '',
-        topic: '',
-        reason: '',
-        isRobot: false
-      });
-      setErrors({});
+        if (response.ok) {
+          setPopup({ show: true, message: 'Form submitted successfully! 🎉', type: 'success' });
+
+          // Reset form data after successful submission
+          setFormData({
+            name: '',
+            email: '',
+            contact: '',
+            department: '',
+            domain: '',
+            topic: '',
+            reason: '',
+            isRobot: false
+          });
+          setErrors({});
+        } else {
+          const errorData = await response.json();
+          setPopup({ show: true, message: errorData.error || 'Failed to submit form', type: 'error' });
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        setPopup({ show: true, message: 'Failed to submit form', type: 'error' });
+      }
     }
   };
 
@@ -174,10 +196,11 @@ export default function StudentRequestForm() {
                 {errors.email && <div className="error-text">{errors.email}</div>}
               </div>
 
+
               {/* CONTACT */}
               <div className="form-group">
                 <label>
-                  <Phone className="field-icon" /> Contact No <span className="required">*</span>
+                  <Phone className="field-icon" /> Contact No <span>*</span>
                 </label>
                 <input
                   type="tel"

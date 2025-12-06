@@ -1,5 +1,3 @@
-
-
 import { User, Mail, GraduationCap, MessageSquare, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -21,6 +19,34 @@ const WebinarAlumniFeedbackForm = () => {
 
   const [errors, setErrors] = useState({});
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const [webinars, setWebinars] = useState([]);
+  const [webinarsLoading, setWebinarsLoading] = useState(true);
+  const [webinarsError, setWebinarsError] = useState(null);
+
+  // Fetch webinars from topic approvals
+  useEffect(() => {
+    const fetchWebinars = async () => {
+      setWebinarsLoading(true);
+      setWebinarsError(null);
+      try {
+        const res = await fetch('http://localhost:5000/api/topic-approvals');
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        // Extract topics from the response
+        const topics = data.map(item => item.topic);
+        setWebinars(topics);
+      } catch (err) {
+        console.error("Error fetching webinars:", err);
+        setWebinarsError(err.message);
+      } finally {
+        setWebinarsLoading(false);
+      }
+    };
+
+    fetchWebinars();
+  }, []);
 
   // 🔥 Auto-fill Name + Email when email entered
   useEffect(() => {
@@ -61,7 +87,7 @@ const WebinarAlumniFeedbackForm = () => {
   };
 
   // Submit handler
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {};
 
     if (!formData.isRobot) {
@@ -77,20 +103,46 @@ const WebinarAlumniFeedbackForm = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log("Feedback submitted:", formData);
-      setPopup({ show: true, message: 'Feedback submitted successfully! 🎉', type: 'success' });
+      try {
+        const feedbackData = {
+          name: formData.name,
+          email: formData.email,
+          webinarTopic: formData.webinar,
+          arrangementsRating: formData.rating1,
+          studentParticipationRating: formData.rating2,
+          feedback: formData.feedback,
+        };
 
-      // Reset form data after successful submission
-      setFormData({
-        name: "",
-        email: "",
-        webinar: "",
-        rating1: "",
-        rating2: "",
-        feedback: "",
-        isRobot: false,
-      });
-      setErrors({});
+        const response = await fetch('http://localhost:5000/api/alumni-feedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(feedbackData),
+        });
+
+        if (response.ok) {
+          setPopup({ show: true, message: 'Feedback submitted successfully! 🎉', type: 'success' });
+
+          // Reset form data after successful submission
+          setFormData({
+            name: "",
+            email: "",
+            webinar: "",
+            rating1: "",
+            rating2: "",
+            feedback: "",
+            isRobot: false,
+          });
+          setErrors({});
+        } else {
+          const errorData = await response.json();
+          setPopup({ show: true, message: errorData.message || 'Failed to submit feedback. Please try again.', type: 'error' });
+        }
+      } catch (error) {
+        console.error('Error submitting feedback:', error);
+        setPopup({ show: true, message: 'Network error. Please check your connection and try again.', type: 'error' });
+      }
     }
   };
 
@@ -159,11 +211,16 @@ const WebinarAlumniFeedbackForm = () => {
                   value={formData.webinar}
                   onChange={handleChange}
                   className="select-field"
+                  disabled={webinarsLoading}
                 >
-                  <option value="" disabled>-- Choose Webinar --</option>
-                  <option value="webinar1">Webinar 1</option>
-                  <option value="webinar2">Webinar 2</option>
+                  <option value="" disabled>
+                    {webinarsLoading ? 'Loading webinars...' : webinarsError ? 'Error loading webinars' : '-- Choose Webinar --'}
+                  </option>
+                  {webinars.map((topic, index) => (
+                    <option key={index} value={topic}>{topic}</option>
+                  ))}
                 </select>
+                {webinarsError && <div className="error-text">Failed to load webinars: {webinarsError}</div>}
                 {errors.webinar && <div className="error-text">{errors.webinar}</div>}
               </div>
 

@@ -378,3 +378,123 @@
     border-radius: 0.8rem;
   }
 }
+.circular-container {
+  width: 800px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #000;
+  font-family: "Times New Roman", serif;
+  background: #fff;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #000;
+}
+
+.header {
+  text-align: center;
+  line-height: 1.4;
+}
+
+.header h2 {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.header h3 {
+  margin-top: 8px;
+  text-decoration: underline;
+}
+
+.date-field {
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: right;
+}
+
+.intro {
+  margin: 18px 0;
+  text-align: justify;
+}
+
+.circular-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+}
+
+.circular-table th,
+.circular-table td {
+  border: 1px solid #000;
+  padding: 6px;
+  vertical-align: top;
+  text-align: center;
+}
+
+.circular-table th:nth-child(1),
+.circular-table td:nth-child(1) {
+  width: 8%;
+
+}
+
+.circular-table th:nth-child(2),
+.circular-table td:nth-child(2) {
+  width: 12%;
+}
+
+.circular-table th:nth-child(3),
+.circular-table td:nth-child(3) {
+  width: 13%;
+}
+
+.circular-table th:nth-child(4),
+.circular-table td:nth-child(4) {
+  width: 20%;
+}
+
+.circular-table th:nth-child(5),
+.circular-table td:nth-child(5) {
+  width: 22%;
+}
+
+.circular-table th:nth-child(6),
+.circular-table td:nth-child(6) {
+  width: 25%;
+}
+
+.circular-table th {
+  text-align: center;
+  font-weight: bold;
+}
+
+.footer-section {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  font-weight: bold;
+}
+
+.footer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.footer-table td {
+  border-bottom: 1px solid #000;
+  padding: 40px 10px 10px 10px;
+  text-align: center;
+  vertical-align: bottom;
+}

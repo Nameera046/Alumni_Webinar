@@ -1,5 +1,7 @@
-# TODO for WebinarEvents Modifications
+# TODO for Dynamic Phase Implementation
 
-- [ ] Remove the "Feedback Form" button from the WebinarDetail modal in WebinarEvents.jsx
-- [ ] Add a "Feedback Form" button to the WebinarCard that navigates to "/student-feedback"
-- [ ] Add a disabled "Download Certificate" button to the WebinarCard
+- [ ] Update PhaseProvider to dynamically generate phases based on current date
+- [ ] Add generateInitialData function for new phases after Phase 5
+- [ ] Modify DashboardShell to use seed data for Phase 1-5 and initial data for Phase 6+
+- [ ] Ensure topics sections are shown only for Phase 6+
+- [ ] Test phase dropdown updates and data initialization

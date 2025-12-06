@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { GraduationCap, User, Mail, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Popup from './Popup';
 import "./Common.css";
 
 export default function WebinarStudentFeedbackForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -49,6 +50,20 @@ export default function WebinarStudentFeedbackForm() {
 
     fetchMemberDetails();
   }, [formData.email]);
+
+  // Auto-fill webinar and speaker from URL params
+  useEffect(() => {
+    const topic = searchParams.get('topic');
+    const speaker = searchParams.get('speaker');
+
+    if (topic && speaker) {
+      setFormData((prev) => ({
+        ...prev,
+        webinar: topic,
+        speaker: speaker,
+      }));
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -183,32 +198,30 @@ export default function WebinarStudentFeedbackForm() {
 
               {/* Webinar */}
               <div className="form-group">
-                <label>Select Webinar Attended <span className="required">*</span></label>
-                <select
-                  className="select-field"
+                <label>Webinar Attended <span className="required">*</span></label>
+                <input
+                  type="text"
                   name="webinar"
                   value={formData.webinar}
                   onChange={handleChange}
-                >
-                  <option value="" disabled>-- Choose Webinar --</option>
-                  <option value="webinar1">Webinar 1</option>
-                  <option value="webinar2">Webinar 2</option>
-                </select>
+                  placeholder="Auto filled from webinar card"
+                  className="input-field"
+                  readOnly
+                />
               </div>
 
               {/* Speaker */}
               <div className="form-group">
-                <label>Select Speaker <span className="required">*</span></label>
-                <select
-                  className="select-field"
+                <label>Speaker <span className="required">*</span></label>
+                <input
+                  type="text"
                   name="speaker"
                   value={formData.speaker}
                   onChange={handleChange}
-                >
-                  <option value="" disabled>-- Choose Speaker --</option>
-                  <option value="speaker1">Speaker 1</option>
-                  <option value="speaker2">Speaker 2</option>
-                </select>
+                  placeholder="Auto filled from webinar card"
+                  className="input-field"
+                  readOnly
+                />
               </div>
 
               {/* Ratings */}

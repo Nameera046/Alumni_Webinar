@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, ArrowLeft, Eye, X } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import stringSimilarity from 'string-similarity';
+import Popup from './Popup';
 import './Common.css';
 import './WebinarDashboard.css';
 
@@ -8,46 +10,121 @@ export default function TopicApprovalForm() {
   const navigate = useNavigate();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null);
-  const [topics, setTopics] = useState([
-    {
-      domain: "AI / ML",
-      topic: "AI in Medical Diagnosis",
-      totalRequested: 12,
-      status: "Approved",
-      students: [
-        { serialNumber: 1, email: "john.doe@example.com", name: "John Doe", department: "Computer Science", reason: "Research on AI applications in healthcare" },
-        { serialNumber: 2, email: "jane.smith@example.com", name: "Jane Smith", department: "Information Technology", reason: "Project on medical imaging" },
-        { serialNumber: 3, email: "bob.johnson@example.com", name: "Bob Johnson", department: "Data Science", reason: "Thesis on AI diagnostics" }
-      ]
-    },
-    {
-      domain: "Web Development",
-      topic: "Responsive UI Frameworks",
-      totalRequested: 8,
-      status: "On Hold",
-      students: [
-        { serialNumber: 1, email: "alice.williams@example.com", name: "Alice Williams", department: "Computer Science", reason: "Building responsive web applications" },
-        { serialNumber: 2, email: "charlie.brown@example.com", name: "Charlie Brown", department: "Software Engineering", reason: "Learning modern UI frameworks" }
-      ]
-    },
-    {
-      domain: "Cyber Security",
-      topic: "Phishing Detection",
-      totalRequested: 15,
-      status: "On Hold",
-      students: [
-        { serialNumber: 1, email: "david.miller@example.com", name: "David Miller", department: "Cyber Security", reason: "Developing phishing detection tools" },
-        { serialNumber: 2, email: "eve.davis@example.com", name: "Eve Davis", department: "Information Security", reason: "Research on email security" },
-        { serialNumber: 3, email: "frank.wilson@example.com", name: "Frank Wilson", department: "Computer Science", reason: "Machine learning for phishing detection" }
-      ]
-    }
-  ]);
+  const [topics, setTopics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isApprovalPopupVisible, setIsApprovalPopupVisible] = useState(false);
+  const [approvalPopupMessage, setApprovalPopupMessage] = useState('');
 
-  const handleApprove = (index) => {
-    const updatedTopics = [...topics];
-    updatedTopics[index].status =
-      updatedTopics[index].status === "Approved" ? "On Hold" : "Approved";
-    setTopics(updatedTopics);
+  // Function to group topics using fuzzy matching
+  const groupTopics = (topics) => {
+    let groups = [];
+    topics.forEach(t => {
+      let found = false;
+      for (let g of groups) {
+        if (stringSimilarity.compareTwoStrings(t, g[0]) > 0.6) {
+          g.push(t);
+          found = true;
+          break;
+        }
+      }
+      if (!found) groups.push([t]);
+    });
+    return groups;
+  };
+
+  // Fetch topic approvals on component mount
+  useEffect(() => {
+    fetchTopicApprovals();
+  }, []);
+
+  const fetchTopicApprovals = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/topic-approvals');
+      const data = await response.json();
+      setTopics(data.map(item => ({
+        ...item,
+        totalRequested: item.total_requested,
+        status: item.approval
+      })));
+    } catch (error) {
+      console.error('Error fetching topic approvals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  const handleApprove = async (index) => {
+    const topic = topics[index];
+    const newStatus = topic.status === "Approved" ? "On Hold" : "Approved";
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/topic-approvals/${topic._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ approval: newStatus }),
+      });
+
+      if (response.ok) {
+        const updatedTopics = [...topics];
+        updatedTopics[index].status = newStatus;
+        setTopics(updatedTopics);
+
+        // Show approval popup
+        setApprovalPopupMessage(`Topic "${topic.topic}" is now ${newStatus}.`);
+        setIsApprovalPopupVisible(true);
+      }
+    } catch (error) {
+      console.error('Error updating approval:', error);
+    }
+  };
+
+  const handleView = async (topic) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/student-requests/${encodeURIComponent(topic.domain)}/${encodeURIComponent(topic.topic)}`);
+      const students = await response.json();
+
+      // Fetch member details for each student email
+      const studentsWithDetails = await Promise.all(
+        students.map(async (student, index) => {
+          try {
+            const memberResponse = await fetch(`http://localhost:5000/api/member-by-email?email=${encodeURIComponent(student.email)}`);
+            const memberData = await memberResponse.json();
+
+            return {
+              serialNumber: index + 1,
+              email: student.email,
+              name: memberData.found ? memberData.name : 'N/A',
+              department: memberData.found ? memberData.department : 'N/A',
+              topic: student.topic,
+              reason: student.reason
+            };
+          } catch (error) {
+            console.error('Error fetching member details for email:', student.email, error);
+            return {
+              serialNumber: index + 1,
+              email: student.email,
+              name: 'N/A',
+              department: 'N/A',
+              topic: student.topic,
+              reason: student.reason
+            };
+          }
+        })
+      );
+
+      setSelectedTopic({
+        ...topic,
+        students: studentsWithDetails
+      });
+      setIsPopupOpen(true);
+    } catch (error) {
+      console.error('Error fetching student requests:', error);
+    }
   };
 
   return (
@@ -71,6 +148,8 @@ export default function TopicApprovalForm() {
             </div>
             <h1 className="form-title">Requested Topic Approval</h1>
           </div>
+
+
 
           {/* Table Header */}
           <div className="hidden md:grid md:grid-cols-6 gap-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold p-4 md:p-10 text-center">
@@ -116,18 +195,19 @@ export default function TopicApprovalForm() {
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleApprove(index)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-500
-                        hover:from-blue-700 hover:to-purple-600 text-white shadow-md
-                        px-3 py-2 rounded-lg transition-colors font-medium text-sm"
+                      disabled={item.status === "Approved"}
+                      className={`flex-1 flex items-center justify-center gap-2 shadow-md
+                        px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
+                        item.status === "Approved"
+                          ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                          : "bg-gradient-to-r from-blue-600 to-purple-500 hover:from-blue-700 hover:to-purple-600 text-white"
+                      }`}
                     >
                       ✓ Approve
                     </button>
 
                     <button
-                      onClick={() => {
-                        setSelectedTopic(item);
-                        setIsPopupOpen(true);
-                      }}
+                      onClick={() => handleView(item)}
                       className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-500
                         hover:from-blue-700 hover:to-purple-600 text-white shadow-md
                         px-3 py-2 rounded-lg transition-colors font-medium text-sm"
@@ -158,9 +238,13 @@ export default function TopicApprovalForm() {
                 <div className="hidden md:flex justify-center items-center">
                   <button
                     onClick={() => handleApprove(index)}
-                    className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-500
-                      hover:from-blue-700 hover:to-purple-600 text-white shadow-md
-                      px-5 py-3 rounded-lg transition-colors font-medium min-w-[100px] h-[35px]"
+                    disabled={item.status === "Approved"}
+                    className={`flex items-center justify-center gap-2 shadow-md
+                      px-5 py-3 rounded-lg transition-colors font-medium min-w-[100px] h-[35px] ${
+                      item.status === "Approved"
+                        ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                        : "bg-gradient-to-r from-blue-600 to-purple-500 hover:from-blue-700 hover:to-purple-600 text-white"
+                    }`}
                   >
                     ✓ Approve
                   </button>
@@ -168,10 +252,7 @@ export default function TopicApprovalForm() {
 
                 <div className="hidden md:flex justify-center items-center">
                   <button
-                    onClick={() => {
-                      setSelectedTopic(item);
-                      setIsPopupOpen(true);
-                    }}
+                    onClick={() => handleView(item)}
                     className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-purple-500
                       hover:from-blue-700 hover:to-purple-600 text-white shadow-md
                       px-5 py-3 rounded-lg transition-colors font-medium min-w-[90px] h-[35px]"
@@ -214,9 +295,10 @@ export default function TopicApprovalForm() {
                 </div>
               </div>
 
-              <h4>Student Details</h4>
+              <h4 style={{ marginTop: '24px', marginBottom: '16px', color: '#5b21b6', fontWeight: '600', fontSize: '18px' }}>Student Details</h4>
+
               {/* Table Header */}
-              <div className="hidden md:grid md:grid-cols-5 gap-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold p-4 text-center">
+              <div className="hidden md:grid md:grid-cols-5 gap-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold p-4 text-center" style={{ borderRadius: '8px 8px 0 0' }}>
                 <div>Serial Number</div>
                 <div>Name</div>
                 <div>Email</div>
@@ -230,11 +312,11 @@ export default function TopicApprovalForm() {
               </div>
 
               {/* Table Rows */}
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200" style={{ backgroundColor: 'white', borderRadius: '0 0 8px 8px' }}>
                 {selectedTopic.students.map((student, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 items-center hover:bg-purple-50 transition-colors border-b md:border-b-0"
+                    className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 items-center hover:bg-purple-50 transition-colors"
                   >
                     {/* Mobile */}
                     <div className="md:hidden space-y-2">
@@ -246,10 +328,10 @@ export default function TopicApprovalForm() {
 
                     {/* Desktop */}
                     <div className="hidden md:block text-gray-800 font-medium text-center">{student.serialNumber}</div>
-                    <div className="hidden md:block text-gray-700">{student.name}</div>
-                    <div className="hidden md:block text-gray-700">{student.email}</div>
-                    <div className="hidden md:block text-gray-700">{student.department}</div>
-                    <div className="hidden md:block text-gray-700">{student.reason}</div>
+                    <div className="hidden md:block text-gray-700 text-center">{student.name}</div>
+                    <div className="hidden md:block text-gray-700 text-center">{student.email}</div>
+                    <div className="hidden md:block text-gray-700 text-center font-semibold">{student.department}</div>
+                    <div className="hidden md:block text-gray-700 text-center">{student.reason}</div>
                   </div>
                 ))}
               </div>
@@ -260,6 +342,15 @@ export default function TopicApprovalForm() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Approval Popup */}
+      {isApprovalPopupVisible && (
+        <Popup
+          message={approvalPopupMessage}
+          type="success"
+          onClose={() => setIsApprovalPopupVisible(false)}
+        />
       )}
     </div>
   );

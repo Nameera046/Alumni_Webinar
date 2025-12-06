@@ -5,28 +5,62 @@ import {
   FiPhone,
   FiBookOpen,
   FiAward,
-  FiUpload
+  FiUpload,
+  FiDownload
 } from "react-icons/fi";
-import { ArrowLeft,Phone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft,Phone,Globe } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import * as XLSX from 'xlsx';
 import "./Common.css";
 import Popup from './Popup';
-
 const WebinarCompletedDetailsForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
+    domain: "",
     chosenTopic: "",
-    attendanceFile: null,
     prizeWinnerEmail: "",
     name: "",
     department: "",
     batch: "",
      contact: "",
+     attendedCount: "",
   });
 
   const [errors, setErrors] = useState({});
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const [attendanceFile, setAttendanceFile] = useState(null);
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [canDownloadCertificate, setCanDownloadCertificate] = useState(false);
+
+  // Fetch webinar details on component mount
+  useEffect(() => {
+    const fetchWebinarDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/webinars/${id}`);
+        const webinar = await response.json();
+
+        if (response.ok) {
+          setFormData((prev) => ({
+            ...prev,
+            domain: webinar.domain || "",
+            chosenTopic: webinar.topic || "",
+          }));
+        } else {
+          console.error('Error fetching webinar:', webinar.error);
+          setPopup({ show: true, message: 'Error loading webinar details', type: 'error' });
+        }
+      } catch (error) {
+        console.error('Error fetching webinar:', error);
+        setPopup({ show: true, message: 'Error loading webinar details', type: 'error' });
+      }
+    };
+
+    if (id) {
+      fetchWebinarDetails();
+    }
+  }, [id]);
 
   // Fetch student details based on prizeWinnerEmail
   useEffect(() => {
@@ -68,39 +102,99 @@ const WebinarCompletedDetailsForm = () => {
 
   // Handle file upload
   const handleFileChange = (e) => {
-    setFormData({ ...formData, attendanceFile: e.target.files[0] });
+    const file = e.target.files[0];
+    if (file) {
+      setAttendanceFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        setAttendanceData(jsonData);
+        console.log('Parsed Excel data:', jsonData);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+
+  // Check if prize winner can download certificate
+  useEffect(() => {
+    if (formData.prizeWinnerEmail && attendanceData.length > 0) {
+      const winnerData = attendanceData.find(row =>
+        row.Email?.toLowerCase() === formData.prizeWinnerEmail.toLowerCase()
+      );
+      if (winnerData && winnerData.Duration) {
+        // Parse duration - assuming it's in minutes or "HH:MM" format
+        let durationMinutes = 0;
+        if (typeof winnerData.Duration === 'number') {
+          durationMinutes = winnerData.Duration;
+        } else if (typeof winnerData.Duration === 'string') {
+          // Handle "HH:MM" format
+          const timeMatch = winnerData.Duration.match(/(\d+):(\d+)/);
+          if (timeMatch) {
+            durationMinutes = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
+          } else {
+            durationMinutes = parseFloat(winnerData.Duration) || 0;
+          }
+        }
+        setCanDownloadCertificate(durationMinutes > 30);
+      } else {
+        setCanDownloadCertificate(false);
+      }
+    }
+  }, [formData.prizeWinnerEmail, attendanceData]);
+
+  // Handle certificate download
+  const handleDownloadCertificate = () => {
+    // This would typically call an API to generate and download the certificate
+    alert('Certificate download functionality would be implemented here');
   };
 
   // Submit form
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
 
-    if (!formData.chosenTopic)
-      newErrors.chosenTopic = "Chosen Topic is required";
-    if (!formData.attendanceFile)
-      newErrors.attendanceFile = "Attendance Excel Sheet is required";
+    if (!formData.attendedCount)
+      newErrors.attendedCount = "Attended Count is required";
     if (!formData.prizeWinnerEmail)
       newErrors.prizeWinnerEmail = "Prize Winner Email is required";
+    if (!attendanceFile)
+      newErrors.attendanceFile = "Attendance Excel file is required";
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log("Submitted:", formData);
-      setPopup({ show: true, message: 'Form submitted successfully! 🎉', type: 'success' });
+      try {
+        const response = await fetch(`http://localhost:5000/api/webinars/${id}/complete`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            attendedCount: parseInt(formData.attendedCount),
+            prizeWinnerEmail: formData.prizeWinnerEmail,
+            attendanceData: attendanceData,
+          }),
+        });
 
-      // Reset form data after successful submission
-      setFormData({
-        chosenTopic: "",
-        attendanceFile: null,
-        prizeWinnerEmail: "",
-        name: "",
-        department: "",
-        batch: "",
-        contact: "",
-      });
-      setErrors({});
+        if (response.ok) {
+          setPopup({ show: true, message: 'Webinar completion details saved successfully! 🎉', type: 'success' });
+          // Navigate back to webinar events after success
+          setTimeout(() => {
+            navigate('/webinar-events');
+          }, 2000);
+        } else {
+          const errorData = await response.json();
+          setPopup({ show: true, message: errorData.error || 'Failed to save webinar details', type: 'error' });
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        setPopup({ show: true, message: 'Failed to save webinar details', type: 'error' });
+      }
     }
   };
 
@@ -132,50 +226,65 @@ const WebinarCompletedDetailsForm = () => {
           <div className="form-card">
             <form onSubmit={handleSubmit} noValidate>
               <div className="form-fields">
-
+                 <div className="form-group">
+                                 <label>
+                                   <Globe className="field-icon" /> Domain
+                                 </label>
+                                 <input
+                                   type="text"
+                                   value={formData.domain}
+                                   readOnly
+                                   className="input-field readonly"
+                                   placeholder="Auto-filled from webinar details"
+                                 />
+                               </div>
                 {/* Topic */}
                 <div className="form-group">
                   <label>
-                    <FiBookOpen className="field-icon" /> Chosen Topic{" "}
-                    <span>*</span>
+                    <FiBookOpen className="field-icon" /> Chosen Topic
                   </label>
-                  <select
-                    name="chosenTopic"
+                  <input
+                    type="text"
                     value={formData.chosenTopic}
+                    readOnly
+                    className="input-field readonly"
+                    placeholder="Auto-filled from webinar details"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>
+                    <FiAward className="field-icon" /> Attended Count <span>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="attendedCount"
+                    value={formData.attendedCount}
                     onChange={handleInputChange}
-                    className="select-field"
+                    placeholder="Attended Count of the Students"
+                    className="input-field"
                     required
-                  >
-                    <option value="">Select a topic</option>
-                    <option value="React Basics">React Basics</option>
-                    <option value="Cloud Fundamentals">
-                      Cloud Fundamentals
-                    </option>
-                    <option value="AI Workshop">AI Workshop</option>
-                  </select>
-                  {errors.chosenTopic && (
-                    <div className="error-text">{errors.chosenTopic}</div>
+                  />
+                  {errors.attendedCount && (
+                    <div className="error-text">{errors.attendedCount}</div>
                   )}
                 </div>
 
-                {/* Upload File */}
+                {/* Attendance File Upload */}
                 <div className="form-group">
                   <label>
-                    <FiUpload className="field-icon" /> Upload Attendance Excel
-                    Sheet <span>*</span>
+                    <FiUpload className="field-icon" /> Attendance Excel File <span>*</span>
                   </label>
                   <input
                     type="file"
-                    accept=".xlsx,.xls,.pdf,.doc,.docx"
+                    accept=".xlsx,.xls"
                     onChange={handleFileChange}
                     className="input-field"
                     required
                   />
-                  {errors.attendanceFile && (
-                    <div className="error-text">{errors.attendanceFile}</div>
-                  )}
+                  <small className="help-text">
+                    Upload Excel file with Email and Duration columns. Certificate download will be enabled for attendees with duration {'>'} 30 minutes.
+                  </small>
                 </div>
-
                 {/* Prize Winner Email */}
                 <div className="form-group">
                   <label>

@@ -3,19 +3,26 @@ import { Building2, Clock, Compass, Globe, Upload, Calendar, X ,User,ArrowLeft, 
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import './Common.css';
-import WebinarPoster from './WebinarPoster';
 import Popup from './Popup';
+
+const typeOptions = [
+  { value: "fullstack_development", label: "Fullstack Development" },
+  { value: "blockchain", label: "Blockchain" },
+  { value: "artificial_intelligence", label: "Artificial Intelligence" },
+  { value: "ui_ux", label: "Ui & Ux " }
+];
 
 export default function WebinarSpeakerAssignmentForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: '', name: '', department: '', batch: '', designation: '', companyName: '', speakerPhoto: null, domain: '', conductingDepartment: '', webinarVenue: 'NEC Auditorium, Kovilpatti', alumniCity: 'Chennai', meetingLink: ''
+    email: '', name: '', department: '', batch: '', designation: '', companyName: '', speakerPhoto: null, domain: '', topic: '', webinarVenue: 'NEC Auditorium, Kovilpatti', alumniCity: 'Chennai', meetingLink: ''
   });
   const [slots, setSlots] = useState([{ deadline: '2024-12-15', webinarDate: '', time: '9:30-10:30' }]);
   const [showPoster, setShowPoster] = useState(false);
   const [photoURL, setPhotoURL] = useState(null);
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
   const [loading, setLoading] = useState(false);
+  const [topics, setTopics] = useState([]);
 
   useEffect(() => {
     if (formData.speakerPhoto) {
@@ -25,6 +32,24 @@ export default function WebinarSpeakerAssignmentForm() {
     }
   }, [formData.speakerPhoto]);
 
+  useEffect(() => {
+    const fetchTopics = async () => {
+      if (!formData.domain) {
+        setTopics([]);
+        return;
+      }
+      try {
+        const response = await fetch(`http://localhost:5000/api/topic-approvals`);
+        const data = await response.json();
+        const filteredTopics = data.filter(topic => topic.domain === formData.domain && topic.approval === 'Approved');
+        setTopics(filteredTopics);
+      } catch (error) {
+        console.error('Error fetching topics:', error);
+      }
+    };
+    fetchTopics();
+  }, [formData.domain]);
+
   const handleChange = e => {
     const { name, value, files } = e.target;
     setFormData(prev => ({ ...prev, [name]: files ? files[0] : value }));
@@ -33,6 +58,12 @@ export default function WebinarSpeakerAssignmentForm() {
   const handleSlotChange = (index, field, value) => {
     const updated = [...slots];
     updated[index][field] = value;
+
+    // If webinarDate is changed, ensure deadline is before it
+    if (field === 'webinarDate' && updated[index].deadline && new Date(updated[index].deadline) >= new Date(value)) {
+      updated[index].deadline = ''; // Reset deadline if it's not before the new webinar date
+    }
+
     setSlots(updated);
   };
 
@@ -62,21 +93,50 @@ export default function WebinarSpeakerAssignmentForm() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.email || !formData.name || !formData.department || !formData.batch || !formData.designation ||
-        !formData.companyName || !formData.speakerPhoto || !formData.domain || !formData.conductingDepartment ||
+        !formData.companyName || !formData.speakerPhoto || !formData.domain || !formData.topic ||
         !formData.meetingLink || slots.some(s => !s.deadline || !s.webinarDate || !s.time)) {
       setPopup({ show: true, message: 'Please fill all required fields', type: 'error' });
       return;
     }
-    console.log("Form submitted:", formData);
-    console.log("Assigned slots:", slots);
-    setPopup({ show: true, message: 'Speaker assigned successfully! 🎉', type: 'success' });
+
+    setLoading(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('designation', formData.designation);
+      formDataToSend.append('companyName', formData.companyName);
+      formDataToSend.append('alumniCity', formData.alumniCity);
+      formDataToSend.append('domain', formData.domain);
+      formDataToSend.append('topic', formData.topic);
+      formDataToSend.append('webinarVenue', formData.webinarVenue);
+      formDataToSend.append('meetingLink', formData.meetingLink);
+      formDataToSend.append('speakerPhoto', formData.speakerPhoto);
+      formDataToSend.append('slots', JSON.stringify(slots));
+
+      const response = await fetch('http://localhost:5000/api/assign-speaker', {
+        method: 'POST',
+        body: formDataToSend
+      });
+
+      if (response.ok) {
+        setPopup({ show: true, message: 'Speaker assigned successfully! 🎉', type: 'success' });
+      } else {
+        const errorData = await response.json();
+        setPopup({ show: true, message: errorData.error || 'Error assigning speaker', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setPopup({ show: true, message: 'Error assigning speaker', type: 'error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGeneratePoster = () => {
     if (!formData.name || !formData.department || !formData.batch || !formData.designation ||
-        !formData.companyName || !formData.speakerPhoto || !formData.domain || !formData.conductingDepartment ||
+        !formData.companyName || !formData.speakerPhoto || !formData.domain || !formData.topic ||
         slots.some(s => !s.deadline || !s.webinarDate || !s.time)) {
       alert("Please fill all required fields before generating the poster");
       return;
@@ -178,11 +238,9 @@ export default function WebinarSpeakerAssignmentForm() {
                   className="input-field"
                 >
                   <option value="">Select Domain</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Management">Management</option>
-                  <option value="Science">Science</option>
-                  <option value="Arts">Arts</option>
+                  {typeOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
                 </select>
               </div>
 
@@ -193,17 +251,15 @@ export default function WebinarSpeakerAssignmentForm() {
                 </label>
 
                 <select
-                  name="conductingDepartment"
-                  value={formData.conductingDepartment}
+                  name="topic"
+                  value={formData.topic}
                   onChange={handleChange}
                   className="input-field"
                 >
                   <option value="">Select Webinar Topic</option>
-                  <option value="AI and ML">AI & Machine Learning</option>
-                  <option value="Cloud Computing">Cloud Computing</option>
-                  <option value="Cyber Security">Cyber Security</option>
-                  <option value="Full Stack Development">Full Stack Development</option>
-                  <option value="Career Guidance">Career Guidance</option>
+                  {topics.map(topic => (
+                    <option key={topic._id} value={topic.topic}>{topic.topic}</option>
+                  ))}
                 </select>
               </div>
 
@@ -243,13 +299,28 @@ export default function WebinarSpeakerAssignmentForm() {
                     <label>
                       <Calendar className="field-icon" /> WebinarDate <span className="required">*</span>
                     </label>
-                    <input type="date" value={slot.webinarDate} onChange={e => handleSlotChange(i, "webinarDate", e.target.value)} placeholder="Select date" className="input-field" />
+                    <input
+                      type="date"
+                      value={slot.webinarDate}
+                      onChange={e => handleSlotChange(i, "webinarDate", e.target.value)}
+                      placeholder="Select date"
+                      className="input-field"
+                      min={new Date().toISOString().split('T')[0]}
+                    />
                   </div>
                   <div className="form-group">
                     <label>
                       <Calendar className="field-icon" /> Deadline <span className="required">*</span>
                     </label>
-                    <input type="date" value={slot.deadline} onChange={e => handleSlotChange(i, "deadline", e.target.value)} placeholder="Select date" className="input-field" />
+                    <input
+                      type="date"
+                      value={slot.deadline}
+                      onChange={e => handleSlotChange(i, "deadline", e.target.value)}
+                      placeholder="Select date"
+                      className="input-field"
+                      min={new Date().toISOString().split('T')[0]}
+                      max={slot.webinarDate || undefined}
+                    />
                   </div>
                   <div className="form-group">
                     <label>
